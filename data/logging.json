@@ -1,0 +1,24 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "generic": {
+            "format": "%(asctime)s | %(name)s - %(levelname)s : %(message)s"
+        }
+    },
+    "handlers": {
+        "display_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "generic"
+        }
+    },
+    "loggers": {
+        "display": {
+            "level": "DEBUG",
+            "handlers": [
+                "display_handler"
+            ]
+        }
+    }
+}
