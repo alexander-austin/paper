@@ -11,6 +11,11 @@
             "level": "DEBUG",
             "class": "logging.FileHandler",
             "formatter": "generic"
+        },
+        "imager_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "generic"
         }
     },
     "loggers": {
@@ -18,6 +23,12 @@
             "level": "DEBUG",
             "handlers": [
                 "display_handler"
+            ]
+        },
+        "imager": {
+            "level": "DEBUG",
+            "handlers": [
+                "imager_handler"
             ]
         }
     }

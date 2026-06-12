@@ -27,6 +27,18 @@ def getPaths():
                 'data'
             )
         },
+        'io_settings': {
+            'type': 'json',
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'io_settings.json'
+            )
+        },
         'log_config': {
             'type': 'data',
             'path': os.path.join(
@@ -49,6 +61,18 @@ def getPaths():
                 ),
                 'data',
                 'display.log'
+            )
+        },
+        'imager_log': {
+            'type': 'log',
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'imager.log'
             )
         }
     }
