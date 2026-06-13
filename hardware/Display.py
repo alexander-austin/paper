@@ -4,7 +4,6 @@
 
 import time, sys
 
-
 class Display:
 
 
@@ -21,9 +20,9 @@ class Display:
         self.ioSettings = jsonLoad(self.paths['io_settings'], self.logger)
 
         if isinstance(self.ioSettings, str):
-            
+
             self.state = 'error'
-            self.logger.error(' '.join([str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
+            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
             return
 
         try:
@@ -34,16 +33,33 @@ class Display:
 
         except ImportError:
 
+            from .DevGPIO import DevGPIO
             self.GPIO = DevGPIO()
+
+            from .DevSPI import DevSPI
             self.SPI = DevSPI()
 
-        self.startup()
+        self._startup()
+
+        if not self.state == 'error': self.state = 'ready'
 
 
         return
 
 
-    def startup(self):
+    def displayBufferedBytes(self, bufferedBytes):
+        """Displays image from buffered bytes."""
+
+        self._runSequence(
+            self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['display'],
+            bufferedBytes
+        )
+
+
+        return self.state
+
+
+    def _startup(self):
         """Begin hardware connection."""
 
         try:
@@ -83,7 +99,7 @@ class Display:
                 )
             )
 
-            self.runSequence(
+            self._runSequence(
                 self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['init']
             )
 
@@ -93,20 +109,8 @@ class Display:
             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
 
 
-        return self.state
-    def displayBufferedBytes(self, bufferedBytes):
-        """Displays image from buffered bytes."""
-
-        self.runSequence(
-            self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['display'],
-            bufferedBytes
-        )
-
-
-        return self.state
-
-
-    def runSequence(self, sequence, var=None):
+        return
+    def _runSequence(self, sequence, var=None):
         """."""
 
         if not isinstance(sequence, list):
@@ -135,28 +139,28 @@ class Display:
 
                     elif item['type'] == 'command':
 
-                        self.runSequence(
+                        self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['command'],
-                            item['data']
+                            hex(item['data'])
                         )
 
                     elif item['type'] == 'data':
 
-                        self.runSequence(
+                        self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['data'],
-                            item['data']
+                            hex(item['data'])
                         )
 
                     elif item['type'] == 'data2':
 
-                        self.runSequence(
+                        self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['data2'],
                             item['data']
                         )
 
                     elif item['type'] == 'sequence':
 
-                        self.runSequence(
+                        self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences'][item['data']]
                         )
 
@@ -166,7 +170,7 @@ class Display:
 
                     elif item['type'] == 'read':
 
-                        if not self.readWait() == True:
+                        if not self._readWait() == True:
 
                             self.state = 'error'
                             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Read wait timeout', '']))
@@ -174,7 +178,7 @@ class Display:
                     elif item['type'].startswith('pin_'):
 
                         self.GPIO.output(
-                            self.getNamedPinValue(item['type'][4:], 'gpio'),
+                            self._getNamedPinValue(item['type'][4:], 'gpio'),
                             item['data']
                         )
 
@@ -186,7 +190,7 @@ class Display:
 
 
         return
-    def readWait(self):
+    def _readWait(self):
         """Polls busy state. Ready = True. Timeout/error = False."""
 
         tries = 0
@@ -195,7 +199,7 @@ class Display:
 
             try:
 
-                if not self.GPIO.input(self.getNamedPinValue('busy', 'gpio')) == 0:
+                if not self.GPIO.input(self._getNamedPinValue('busy', 'gpio')) == 0:
 
                     return True
 
@@ -210,7 +214,7 @@ class Display:
 
 
         return False
-    def getNamedPinValue(self, name, key):
+    def _getNamedPinValue(self, name, key):
         """Get pin value based on name."""
 
         for pin in self.ioSettings['pins'].keys():
@@ -223,27 +227,3 @@ class Display:
 
 
         return
-
-
-class DevGPIO:
-    IN = 0
-    OUT = 0
-    BCM = 0
-    LOW = 1
-    HIGH = 0
-    def __init__(self): return
-    def output(self, pin, value): return
-    def input(self, pin): return 1
-    def setmode(self, mode): return
-    def setwarnings(self, warnings): return
-    def setup(self, pin, direction): return
-
-class DevSPI:
-    max_speed_hz = 4000000
-    mode = 0b00
-    def __init__(self): return
-    def writebytes(self, data): return
-    def writebytes2(self, data): return
-    def open(self, bus, device): return
-    def close(self): return
-    def cleanup(self, pins): return

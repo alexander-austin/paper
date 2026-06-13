@@ -12,7 +12,17 @@
             "class": "logging.FileHandler",
             "formatter": "generic"
         },
+        "gpinput_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "generic"
+        },
         "imager_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "generic"
+        },
+        "mpu6050_handler": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
             "formatter": "generic"
@@ -25,10 +35,22 @@
                 "display_handler"
             ]
         },
+        "gpinput": {
+            "level": "DEBUG",
+            "handlers": [
+                "gpinput_handler"
+            ]
+        },
         "imager": {
             "level": "DEBUG",
             "handlers": [
                 "imager_handler"
+            ]
+        },
+        "mpu6050": {
+            "level": "DEBUG",
+            "handlers": [
+                "mpu6050_handler"
             ]
         }
     }

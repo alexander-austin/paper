@@ -1,0 +1,1274 @@
+{
+    "display": {
+        "size": {
+            "landscape": {
+                "width": 800,
+                "height": 480
+            },
+            "portrait": {
+                "width": 480,
+                "height": 800
+            }
+        },
+        "palette": [
+            {
+                "id": 0,
+                "name": "black",
+                "fill": false,
+                "r": 0,
+                "g": 0,
+                "b": 0
+            },
+            {
+                "id": 1,
+                "name": "white",
+                "fill": true,
+                "r": 255,
+                "g": 255,
+                "b": 255
+            },
+            {
+                "id": 2,
+                "name": "green",
+                "fill": false,
+                "r": 0,
+                "g": 255,
+                "b": 0
+            },
+            {
+                "id": 3,
+                "name": "blue",
+                "fill": false,
+                "r": 0,
+                "g": 0,
+                "b": 255
+            },
+            {
+                "id": 4,
+                "name": "red",
+                "fill": false,
+                "r": 255,
+                "g": 0,
+                "b": 0
+            },
+            {
+                "id": 5,
+                "name": "yellow",
+                "fill": false,
+                "r": 255,
+                "g": 255,
+                "b": 0
+            },
+            {
+                "id": 6,
+                "name": "orange",
+                "fill": false,
+                "r": 255,
+                "g": 128,
+                "b": 0
+            }
+        ],
+        "thumbnails": [
+            {
+                "width": 512,
+                "height": 512
+            },
+            {
+                "width": 256,
+                "height": 256
+            },
+            {
+                "width": 64,
+                "height": 64
+            }
+        ],
+        "profile": "fit|blur",
+        "blur_brightness": 0.5,
+        "busy_polls": 600,
+        "busy_wait": 5,
+        "spi": {
+            "bus": 0,
+            "device": 0,
+            "mode": {
+                "polarity": 0,
+                "phase": 0
+            },
+            "max_speed_hz": 4000000
+        },
+        "pins": {
+            "rst": "11",
+            "dc": "22",
+            "cs": "24",
+            "busy": "18",
+            "pwr": "12"
+        },
+        "sequences": {
+            "init": [
+                {
+                    "order": 0,
+                    "type": "sequence",
+                    "data": "reset"
+                },
+                {
+                    "order": 1,
+                    "type": "read",
+                    "data": -1
+                },
+                {
+                    "order": 2,
+                    "type": "sleep",
+                    "data": 30
+                },
+                {
+                    "order": 3,
+                    "type": "command",
+                    "data": 170
+                },
+                {
+                    "order": 4,
+                    "type": "data",
+                    "data": 73
+                },
+                {
+                    "order": 5,
+                    "type": "data",
+                    "data": 85
+                },
+                {
+                    "order": 6,
+                    "type": "data",
+                    "data": 32
+                },
+                {
+                    "order": 7,
+                    "type": "data",
+                    "data": 8
+                },
+                {
+                    "order": 8,
+                    "type": "data",
+                    "data": 9
+                },
+                {
+                    "order": 9,
+                    "type": "data",
+                    "data": 24
+                },
+                {
+                    "order": 10,
+                    "type": "command",
+                    "data": 1
+                },
+                {
+                    "order": 11,
+                    "type": "data",
+                    "data": 63
+                },
+                {
+                    "order": 12,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 13,
+                    "type": "data",
+                    "data": 50
+                },
+                {
+                    "order": 14,
+                    "type": "data",
+                    "data": 42
+                },
+                {
+                    "order": 15,
+                    "type": "data",
+                    "data": 14
+                },
+                {
+                    "order": 16,
+                    "type": "data",
+                    "data": 42
+                },
+                {
+                    "order": 17,
+                    "type": "command",
+                    "data": 0
+                },
+                {
+                    "order": 18,
+                    "type": "data",
+                    "data": 95
+                },
+                {
+                    "order": 19,
+                    "type": "data",
+                    "data": 105
+                },
+                {
+                    "order": 20,
+                    "type": "command",
+                    "data": 3
+                },
+                {
+                    "order": 21,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 22,
+                    "type": "data",
+                    "data": 84
+                },
+                {
+                    "order": 23,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 24,
+                    "type": "data",
+                    "data": 68
+                },
+                {
+                    "order": 25,
+                    "type": "command",
+                    "data": 5
+                },
+                {
+                    "order": 26,
+                    "type": "data",
+                    "data": 64
+                },
+                {
+                    "order": 27,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 28,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 29,
+                    "type": "data",
+                    "data": 44
+                },
+                {
+                    "order": 30,
+                    "type": "command",
+                    "data": 6
+                },
+                {
+                    "order": 31,
+                    "type": "data",
+                    "data": 111
+                },
+                {
+                    "order": 32,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 33,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 34,
+                    "type": "data",
+                    "data": 34
+                },
+                {
+                    "order": 35,
+                    "type": "command",
+                    "data": 8
+                },
+                {
+                    "order": 36,
+                    "type": "data",
+                    "data": 111
+                },
+                {
+                    "order": 37,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 38,
+                    "type": "data",
+                    "data": 31
+                },
+                {
+                    "order": 39,
+                    "type": "data",
+                    "data": 34
+                },
+                {
+                    "order": 40,
+                    "type": "command",
+                    "data": 19
+                },
+                {
+                    "order": 41,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 42,
+                    "type": "data",
+                    "data": 4
+                },
+                {
+                    "order": 43,
+                    "type": "command",
+                    "data": 48
+                },
+                {
+                    "order": 44,
+                    "type": "data",
+                    "data": 60
+                },
+                {
+                    "order": 45,
+                    "type": "command",
+                    "data": 65
+                },
+                {
+                    "order": 46,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 47,
+                    "type": "command",
+                    "data": 80
+                },
+                {
+                    "order": 48,
+                    "type": "data",
+                    "data": 63
+                },
+                {
+                    "order": 49,
+                    "type": "command",
+                    "data": 96
+                },
+                {
+                    "order": 50,
+                    "type": "data",
+                    "data": 2
+                },
+                {
+                    "order": 51,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 52,
+                    "type": "command",
+                    "data": 97
+                },
+                {
+                    "order": 53,
+                    "type": "data",
+                    "data": 3
+                },
+                {
+                    "order": 54,
+                    "type": "data",
+                    "data": 32
+                },
+                {
+                    "order": 55,
+                    "type": "data",
+                    "data": 1
+                },
+                {
+                    "order": 56,
+                    "type": "data",
+                    "data": 224
+                },
+                {
+                    "order": 57,
+                    "type": "command",
+                    "data": 130
+                },
+                {
+                    "order": 58,
+                    "type": "data",
+                    "data": 30
+                },
+                {
+                    "order": 59,
+                    "type": "command",
+                    "data": 132
+                },
+                {
+                    "order": 60,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 61,
+                    "type": "command",
+                    "data": 134
+                },
+                {
+                    "order": 62,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 63,
+                    "type": "command",
+                    "data": 227
+                },
+                {
+                    "order": 64,
+                    "type": "data",
+                    "data": 47
+                },
+                {
+                    "order": 65,
+                    "type": "command",
+                    "data": 224
+                },
+                {
+                    "order": 66,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 67,
+                    "type": "command",
+                    "data": 230
+                },
+                {
+                    "order": 68,
+                    "type": "data",
+                    "data": 0
+                }
+            ],
+            "reset": [
+                {
+                    "order": 0,
+                    "type": "pin_rst",
+                    "data": 1
+                },
+                {
+                    "order": 1,
+                    "type": "sleep",
+                    "data": 20
+                },
+                {
+                    "order": 2,
+                    "type": "pin_rst",
+                    "data": 0
+                },
+                {
+                    "order": 3,
+                    "type": "sleep",
+                    "data": 2
+                },
+                {
+                    "order": 4,
+                    "type": "pin_rst",
+                    "data": 1
+                },
+                {
+                    "order": 5,
+                    "type": "sleep",
+                    "data": 20
+                }
+            ],
+            "turn_on": [
+                {
+                    "order": 0,
+                    "type": "command",
+                    "data": 4
+                },
+                {
+                    "order": 1,
+                    "type": "read",
+                    "data": -1
+                },
+                {
+                    "order": 2,
+                    "type": "command",
+                    "data": 24
+                },
+                {
+                    "order": 3,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 4,
+                    "type": "read",
+                    "data": -1
+                },
+                {
+                    "order": 5,
+                    "type": "command",
+                    "data": 2
+                },
+                {
+                    "order": 6,
+                    "type": "data",
+                    "data": 0
+                },
+                {
+                    "order": 7,
+                    "type": "read",
+                    "data": -1
+                }
+            ],
+            "command": [
+                {
+                    "order": 0,
+                    "type": "pin_dc",
+                    "data": 0
+                },
+                {
+                    "order": 1,
+                    "type": "pin_cs",
+                    "data": 0
+                },
+                {
+                    "order": 2,
+                    "type": "var",
+                    "data": -1
+                },
+                {
+                    "order": 3,
+                    "type": "pin_cs",
+                    "data": 1
+                }
+            ],
+            "data": [
+                {
+                    "order": 0,
+                    "type": "pin_dc",
+                    "data": 1
+                },
+                {
+                    "order": 1,
+                    "type": "pin_cs",
+                    "data": 0
+                },
+                {
+                    "order": 2,
+                    "type": "var",
+                    "data": -1
+                },
+                {
+                    "order": 3,
+                    "type": "pin_cs",
+                    "data": 1
+                }
+            ],
+            "data2": [
+                {
+                    "order": 0,
+                    "type": "pin_dc",
+                    "data": 1
+                },
+                {
+                    "order": 1,
+                    "type": "pin_cs",
+                    "data": 0
+                },
+                {
+                    "order": 2,
+                    "type": "var",
+                    "data": -1
+                },
+                {
+                    "order": 3,
+                    "type": "pin_cs",
+                    "data": 1
+                }
+            ],
+            "display": [
+                {
+                    "order": 0,
+                    "type": "command",
+                    "data": 16
+                },
+                {
+                    "order": 1,
+                    "type": "var2",
+                    "data": -1
+                },
+                {
+                    "order": 2,
+                    "type": "sequence",
+                    "data": "turn_on"
+                }
+            ]
+        }
+    },
+    "mpu6050": {
+        "bus": 1,
+        "address": 104,
+        "registers": {
+            "rate_sample": 25,
+            "pwr_mgmt": 107,
+            "config": 26,
+            "interrupt_state": 56,
+            "accelerometer": {
+                "denominator": 16384.0,
+                "x": 59,
+                "y": 61,
+                "z": 63
+            },
+            "gyro": {
+                "denominator": 131.0,
+                "config": 27,
+                "x": 67,
+                "y": 69,
+                "z": 71
+            }
+        },
+        "smoothing": 10
+    },
+    "pins": {
+        "01": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 1,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "3.3v",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "02": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 2,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "5.0v",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "03": {
+            "active": true,
+            "owner": "mpu6050",
+            "name": "",
+            "pin": 3,
+            "gpio": 2,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "sda",
+            "uart": "cts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "04": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 4,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "5.0v",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "05": {
+            "active": true,
+            "owner": "mpu6050",
+            "name": "",
+            "pin": 5,
+            "gpio": 3,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "scl",
+            "uart": "rts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "06": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 6,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "07": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 7,
+            "gpio": 4,
+            "gpclk": 0,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "txd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "08": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 8,
+            "gpio": 14,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "txd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "09": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 9,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "10": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 10,
+            "gpio": 15,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "rxd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "11": {
+            "active": true,
+            "owner": "display",
+            "name": "rst",
+            "pin": 11,
+            "gpio": 17,
+            "gpclk": -1,
+            "gpdir": "out",
+            "pwr": "",
+            "spi": "1ce1",
+            "i2c": "",
+            "uart": "rts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "12": {
+            "active": true,
+            "owner": "display",
+            "name": "pwr",
+            "pin": 12,
+            "gpio": 18,
+            "gpclk": -1,
+            "gpdir": "out",
+            "gpval": 1,
+            "pwr": "",
+            "spi": "1ce0",
+            "i2c": "",
+            "uart": "",
+            "pcm": "clk",
+            "pwm": "0"
+        },
+        "13": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 13,
+            "gpio": 27,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "14": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 14,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "15": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 15,
+            "gpio": 22,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "16": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 16,
+            "gpio": 23,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "17": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 17,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "3.3v",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "18": {
+            "active": true,
+            "owner": "display",
+            "name": "busy",
+            "pin": 18,
+            "gpio": 24,
+            "gpclk": -1,
+            "gpdir": "in",
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "19": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 19,
+            "gpio": 10,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "0mosi",
+            "i2c": "",
+            "uart": "cts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "20": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 20,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "21": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 21,
+            "gpio": 9,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "0miso",
+            "i2c": "",
+            "uart": "rxd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "22": {
+            "active": true,
+            "owner": "display",
+            "name": "dc",
+            "pin": 22,
+            "gpio": 25,
+            "gpclk": -1,
+            "gpdir": "out",
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "23": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 23,
+            "gpio": 11,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "0sclk",
+            "i2c": "",
+            "uart": "rts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "24": {
+            "active": true,
+            "owner": "display",
+            "name": "cs",
+            "pin": 24,
+            "gpio": 8,
+            "gpclk": -1,
+            "gpdir": "out",
+            "pwr": "",
+            "spi": "0ce0",
+            "i2c": "",
+            "uart": "txd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "25": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 25,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "26": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 26,
+            "gpio": 7,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "0ce1",
+            "i2c": "",
+            "uart": "rts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "27": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 27,
+            "gpio": 0,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "sda",
+            "uart": "txd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "28": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 28,
+            "gpio": 1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "scl",
+            "uart": "rxd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "29": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 29,
+            "gpio": 5,
+            "gpclk": 1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "rxd",
+            "pcm": "",
+            "pwm": ""
+        },
+        "30": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 30,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "31": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 31,
+            "gpio": 6,
+            "gpclk": 2,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "cts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "32": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 32,
+            "gpio": 12,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "txd",
+            "pcm": "",
+            "pwm": "0"
+        },
+        "33": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 33,
+            "gpio": 13,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "rxd",
+            "pcm": "",
+            "pwm": "1"
+        },
+        "34": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 34,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "35": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 35,
+            "gpio": 19,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "1miso",
+            "i2c": "",
+            "uart": "",
+            "pcm": "fs",
+            "pwm": "1"
+        },
+        "36": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 36,
+            "gpio": 16,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "1ce2",
+            "i2c": "",
+            "uart": "cts",
+            "pcm": "",
+            "pwm": ""
+        },
+        "37": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 37,
+            "gpio": 26,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "38": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 38,
+            "gpio": 20,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "1mosi",
+            "i2c": "",
+            "uart": "",
+            "pcm": "din",
+            "pwm": ""
+        },
+        "39": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 39,
+            "gpio": -1,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "gnd",
+            "spi": "",
+            "i2c": "",
+            "uart": "",
+            "pcm": "",
+            "pwm": ""
+        },
+        "40": {
+            "active": false,
+            "owner": "",
+            "name": "",
+            "pin": 40,
+            "gpio": 21,
+            "gpclk": -1,
+            "gpdir": "none",
+            "gpval": -1,
+            "pwr": "",
+            "spi": "1sclk",
+            "i2c": "",
+            "uart": "",
+            "pcm": "dout",
+            "pwm": ""
+        }
+    }
+}
