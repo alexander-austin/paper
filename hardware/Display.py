@@ -12,12 +12,12 @@ class Display:
 
         self.state = 'initializing'
 
-        from ..utils import loggingGet, getPaths, jsonLoad
+        from utils import loggingGet, getPaths, jsonLoad
         self.logger = loggingGet(str(self.__class__.__name__).lower())
 
         self.paths = getPaths()
 
-        self.ioSettings = jsonLoad(self.paths['io_settings'], self.logger)
+        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
 
         if isinstance(self.ioSettings, str):
 
@@ -77,7 +77,6 @@ class Display:
                             self.ioSettings['pins'][pin]['gpio'],
                             self.GPIO.OUT if self.ioSettings['pins'][pin]['gpdir'] == 'out' else self.GPIO.IN
                         )
-                        self.ioSettings['pins'][pin]['active'] = True
 
                         if self.ioSettings['pins'][pin]['gpdir'] == 'out' and self.ioSettings['pins'][pin]['gpval'] > -1:
 
@@ -111,7 +110,7 @@ class Display:
 
         return
     def _runSequence(self, sequence, var=None):
-        """."""
+        """Run sequence of I/O operations."""
 
         if not isinstance(sequence, list):
 
@@ -199,7 +198,7 @@ class Display:
 
             try:
 
-                if not self.GPIO.input(self._getNamedPinValue('busy', 'gpio')) == 0:
+                if not self.GPIO.input(self._getNamedPinValue('busy', 'gpio')) < 0.5:
 
                     return True
 

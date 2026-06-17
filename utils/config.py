@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+# Paths
 def getPaths():
     """Get file paths, create directories if needed."""
 
@@ -63,6 +64,18 @@ def getPaths():
                 'display.log'
             )
         },
+        'gpinput_log': {
+            'type': 'log',
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'gpinput.log'
+            )
+        },
         'imager_log': {
             'type': 'log',
             'path': os.path.join(
@@ -73,6 +86,18 @@ def getPaths():
                 ),
                 'data',
                 'imager.log'
+            )
+        },
+        'mpu6050_log': {
+            'type': 'log',
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'mpu6050.log'
             )
         }
     }
@@ -92,7 +117,7 @@ def getPaths():
 def loggingInit():
     """Initializes logging config."""
 
-    import logging, os, sys
+    import logging, logging.config, os, sys
 
     paths = getPaths()
     if not os.path.exists(paths['log_config']['path']): sys.exit('could not set logging, config path missing')
@@ -158,13 +183,13 @@ def jsonLoad(path, logger=None):
                         return data
                     except Exception as e: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), repr(e)])
 
-            except FileNotFoundError: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'path does not exist'])
+            except FileNotFoundError: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'path does not exist ' + path])
             except OSError: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'OS error'])
             except Exception as e: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), repr(e)])
 
-        else: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'path does not exist'])
+        else: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'path does not exist ' + path])
 
-    else: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'invalid path type'])
+    else: errorMessage = '.'.join([str(__name__), str(sys._getframe().f_code.co_name), 'invalid path type ' + path])
 
     if len(errorMessage) == 0:
         errorMessage = None

@@ -633,6 +633,22 @@
         },
         "smoothing": 10
     },
+    "gpinput": {
+        "durations": {
+            "poll": 0.1,
+            "history": 30.0,
+            "gap": 1.5,
+            "short": {
+                "min": 0.0,
+                "max": 1.5
+            },
+            "long": {
+                "min": 1.5,
+                "max": 6.0
+            }
+        },
+        "double": true
+    },
     "pins": {
         "01": {
             "active": false,

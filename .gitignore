@@ -9,6 +9,7 @@
 *share/python-wheels/
 *wheels/
 cover/
+dev/
 develop-eggs/
 dist/
 downloads/

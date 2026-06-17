@@ -19,7 +19,7 @@ class Imager:
 
         self.paths = getPaths()
 
-        self.ioSettings = jsonLoad(self.paths['io_settings'], self.logger)
+        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
 
         self._generatePalette()
 

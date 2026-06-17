@@ -3,7 +3,6 @@
 
 
 import math, sys
-from smbus2 import SMBus
 
 
 class Mpu6050:
@@ -14,12 +13,12 @@ class Mpu6050:
 
         self.state = 'initializing'
 
-        from ..utils import loggingGet, getPaths, jsonLoad
+        from utils import loggingGet, getPaths, jsonLoad
         self.logger = loggingGet(str(self.__class__.__name__).lower())
 
         self.paths = getPaths()
 
-        self.ioSettings = jsonLoad(self.paths['io_settings'], self.logger)
+        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
 
         if isinstance(self.ioSettings, str):
 
@@ -27,7 +26,15 @@ class Mpu6050:
             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
             return
         
-        self.bus = SMBus(self.ioSettings[str(self.__class__.__name__).lower()]['bus'])
+        try:
+
+            from smbus2 import SMBus
+            self.bus = SMBus(self.ioSettings[str(self.__class__.__name__).lower()]['bus'])
+
+        except ImportError:
+
+            from .DevSMBus import DevSMBus
+            self.bus = DevSMBus(self.ioSettings[str(self.__class__.__name__).lower()]['bus'])
 
         self.write(
             self.registers['rate_sample'],
