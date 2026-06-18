@@ -27,18 +27,43 @@ class Imager:
         return
     
 
+    def getImageInfo(self, imagePath):
+        """Get image stats from path."""
+
+        imageInfo = {}
+
+        if os.path.exists(imagePath):
+
+            rawImage = Image.open(imagePath).convert('RGB')
+            rawImage = ImageOps.exif_transpose(rawImage)
+
+            imageInfo['size'] = rawImage.size
+
+
+        return imageInfo
     def getQuantizedBuffer(self, imagePath):
-        """."""
+        """Format image for e-paper from path."""
 
-        quantizedBufferedImage = self._profiledImageFromPath(imagePath, self._displaySize())
+        quantizedBufferedImage = []
+
+        if os.path.exists(imagePath):
+
+            quantizedBufferedImage = self._profiledImageFromPath(imagePath, self._displaySize())
+
+            return self._bufferImage(quantizedBufferedImage)
 
 
-        return self._bufferImage(quantizedBufferedImage)
+        return quantizedBufferedImage
     def generateThumbnails(self, imagePath):
-        """."""
+        """Generate thumbnails."""
 
         thumbnailPathsAndSizes = [
             {
+                'file': '%(base)s_%(w)dx%(h)d.jpg' % {
+                    'base': str(imagePath.rsplit(os.sep, 1)[-1]).rsplit('.', 1)[0],
+                    'w': thumbnailSize['width'],
+                    'h': thumbnailSize['height']
+                },
                 'path': os.path.join(
                     imagePath.rsplit(os.sep, 1)[0],
                     '%(base)s_%(w)dx%(h)d.jpg' % {
@@ -68,7 +93,7 @@ class Imager:
 
 
     def _generateThumbnail(self, imagePath, thumbnailPath, size):
-        """."""
+        """Format and save single thumbnail."""
 
         if not os.path.exists(thumbnailPath):
 
@@ -79,7 +104,7 @@ class Imager:
 
         return
     def _profiledImageFromPath(self, imagePath, size):
-        """."""
+        """Format image from path."""
 
         if size is None: size = self._displaySize()
 

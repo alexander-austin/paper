@@ -7,3 +7,4 @@ requests>=2.34.2
 RPi.GPIO>=0.7.1; sys_platform == 'linux'
 smbus2>=0.6.1; sys_platform == 'linux'
 spidev>=3.8; sys_platform == 'linux'
+Werkzeug>=3.0.3

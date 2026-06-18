@@ -1,0 +1,13 @@
+{
+    "name": "paper",
+    "chunk_size": 1048576,
+    "upload_extensions": [
+        "gif",
+        "heic",
+        "heif",
+        "jpg",
+        "jpeg",
+        "webp",
+        "png"
+    ]
+}

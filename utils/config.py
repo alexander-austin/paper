@@ -11,6 +11,7 @@ def getPaths():
     paths = {
         'root': {
             'type': 'directory',
+            'publish': False,
             'path': os.path.dirname(
                 os.path.dirname(
                     os.path.realpath(__file__)
@@ -19,6 +20,7 @@ def getPaths():
         },
         'data': {
             'type': 'directory',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -28,8 +30,98 @@ def getPaths():
                 'data'
             )
         },
+        'temp': {
+            'type': 'directory',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'temp'
+            )
+        },
+        'web': {
+            'type': 'directory',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web'
+            )
+        },
+        'root': {
+            'type': 'directory',
+            'publish': True,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web',
+                'root'
+            )
+        },
+        'static': {
+            'type': 'directory',
+            'publish': True,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web',
+                'static'
+            )
+        },
+        'media': {
+            'type': 'directory',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web',
+                'media'
+            )
+        },
+        'templates': {
+            'type': 'directory',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web',
+                'templates'
+            )
+        },
+        'metadata': {
+            'type': 'json',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'metadata.json'
+            )
+        },
         'io_settings': {
             'type': 'json',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -40,8 +132,22 @@ def getPaths():
                 'io_settings.json'
             )
         },
+        'api_settings': {
+            'type': 'json',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'api_settings.json'
+            )
+        },
         'log_config': {
             'type': 'data',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -54,6 +160,7 @@ def getPaths():
         },
         'display_log': {
             'type': 'log',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -66,6 +173,7 @@ def getPaths():
         },
         'gpinput_log': {
             'type': 'log',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -78,6 +186,7 @@ def getPaths():
         },
         'imager_log': {
             'type': 'log',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
@@ -90,6 +199,7 @@ def getPaths():
         },
         'mpu6050_log': {
             'type': 'log',
+            'publish': False,
             'path': os.path.join(
                 os.path.dirname(
                     os.path.dirname(
