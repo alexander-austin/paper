@@ -21,6 +21,8 @@ class Imager:
 
         self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
 
+        self.orientation = 'landscape'
+
         self._generatePalette()
 
 
@@ -90,6 +92,13 @@ class Imager:
 
 
         return thumbnailPathsAndSizes
+    def setDisplayOrientation(self, orientation):
+        """Set display orientation."""
+
+        self.orientation = orientation
+
+
+        return
 
 
     def _generateThumbnail(self, imagePath, thumbnailPath, size):
@@ -353,10 +362,8 @@ class Imager:
     def _displayOrientation(self):
         """Get display orientation."""
 
-        #TODO:
 
-
-        return 'landscape'
+        return self.orientation
     def _blurRadius(self):
         """Get image blur radius."""
 

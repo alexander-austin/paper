@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
-from . import paths, apiSettings, server, display
-from flask import jsonify, make_response, request, send_file
+from . import paths, apiSettings, server, display, displayCurrentFilePath, orientation
+from flask import jsonify, request, send_file
 from werkzeug.utils import secure_filename
 
 
@@ -46,7 +46,11 @@ def media(apiVersion, mediaPath):
 
             if len(mediaPath) > 0:
 
-                if '.' in mediaPath and not '/' in mediaPath:
+                if mediaPath == 'playlist':
+
+                    pass
+
+                elif '.' in mediaPath and not '/' in mediaPath:
 
                     requestData = request.json
 
@@ -137,6 +141,7 @@ def uploadMediaFile__v1():
                     from utils.Imager import Imager
 
                     imager = Imager()
+                    imager.setDisplayOrientation(orientation['orientation']['orientation'] if 'orientation' in orientation.keys() else 'landscape')
 
                     requestFileInfo = imager.getImageInfo(tempPath)
 
@@ -200,12 +205,46 @@ def hardware(apiVersion, hardwarePath):
 
             if len(hardwarePath) > 0:
 
-                pass
+                if hardwarePath.startswith('display'):
+
+                    if hardwarePath == 'display':
+
+                        requestData = request.json
+
+                        if isinstance(requestData, dict):
+
+                            if 'file' in requestData.keys():
+
+                                if isinstance(requestData['file'], str) and len(requestData['file']) > 0:
+
+                                    return displayMediaFile__v1(requestData['file'])
+
+                    elif '/' in hardwarePath:
+
+                        if len(hardwarePath.split('/')) == 2 and len(hardwarePath.split('/')[-1]) > 0:
+
+                            if hardwarePath.split('/')[-1] == 'next':
+
+                                pass
+
+                            elif hardwarePath.split('/')[-1] == 'back':
+
+                                pass
+
+                elif hardwarePath == 'orientation':
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        # TODO: validation
+                        return orientationUpdate__v1(requestData)
 
 
     return jsonify({'error': 'Bad Request', 'api_version': apiVersion}), 400
 
 
+# Hardware
 def displayMediaFile__v1(fileName):
     """Display media."""
 
@@ -225,6 +264,7 @@ def displayMediaFile__v1(fileName):
                 from utils.Imager import Imager
 
                 imager = Imager()
+                imager.setDisplayOrientation(orientation['orientation']['orientation'] if 'orientation' in orientation.keys() else 'landscape')
 
                 quantizedBuffer = imager.getQuantizedBuffer(filePath)
 
@@ -233,6 +273,7 @@ def displayMediaFile__v1(fileName):
                     if display.state == 'ready':
 
                         display.displayBufferedBytes(quantizedBuffer)
+                        displayCurrentFilePath = filePath
 
                     else:
 
@@ -256,9 +297,31 @@ def displayMediaFile__v1(fileName):
 
 
     return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1'}), 500
+def orientationUpdate__v1(orientationValues):
+    """Update orientation values."""
+
+    if 'orientation' in orientation.keys() and 'orientation' in orientationValues.keys():
+
+        if not orientationValues['orientation']['orientation'] == orientation['orientation']['orientation']:
+
+            orientation = orientationValues
+
+            if len(displayCurrentFilePath) > 0:
+
+                import os
+
+                return displayMediaFile__v1(
+                    displayCurrentFilePath.split(os.sep)[-1]
+                )
+
+        orientation = orientationValues
+
+        return jsonify({'status': 'ok', 'api_version': 'v1'}), 200
 
 
-# Hardware
+    return jsonify({'error': 'Bad Request', 'api_version': 'v1'}), 400
+
+
 def initHardware():
     """Initialize hardware."""
 

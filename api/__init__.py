@@ -17,6 +17,8 @@ from utils import getPaths, jsonLoad
 paths = getPaths()
 apiSettings = jsonLoad(paths['api_settings']['path'])
 display = None
+displayCurrentFilePath = ''
+orientation = {}
 
 server = Flask(apiSettings['name'])
 server.wsgi_app = ProxyFix(
