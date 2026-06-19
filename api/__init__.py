@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-__all__ = ['ping', 'serveStatic', 'initStatic']
+__all__ = ['ping', 'serveStatic', 'initStatic', 'media', 'hardware', 'initHardware']
 
 
 import os, sys
@@ -16,9 +16,9 @@ from utils import getPaths, jsonLoad
 
 paths = getPaths()
 apiSettings = jsonLoad(paths['api_settings']['path'])
+display = None
 
 server = Flask(apiSettings['name'])
-server.CHUNKSIZE = apiSettings['chunk_size']
 server.wsgi_app = ProxyFix(
     server.wsgi_app,
     x_for=1,
@@ -28,6 +28,7 @@ server.wsgi_app = ProxyFix(
 )
 
 
-from .data import ping, serveStatic, initStatic
+from .data import ping, serveStatic, initStatic, media, hardware, initHardware
 
 initStatic()
+initHardware()

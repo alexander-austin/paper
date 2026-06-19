@@ -107,10 +107,16 @@ class Display:
             self.state = 'error'
             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
 
+        self.state = 'ready'
+
 
         return
-    def _runSequence(self, sequence, var=None):
+    def _runSequence(self, sequence, var=None, isChild=False):
         """Run sequence of I/O operations."""
+
+        if self.state == 'error': return
+
+        if not self.state == 'working': self.state = 'working'
 
         if not isinstance(sequence, list):
 
@@ -140,27 +146,31 @@ class Display:
 
                         self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['command'],
-                            hex(item['data'])
+                            var=hex(item['data']),
+                            isChild=True
                         )
 
                     elif item['type'] == 'data':
 
                         self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['data'],
-                            hex(item['data'])
+                            var=hex(item['data']),
+                            isChild=True
                         )
 
                     elif item['type'] == 'data2':
 
                         self._runSequence(
                             self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['data2'],
-                            item['data']
+                            var=item['data'],
+                            isChild=True
                         )
 
                     elif item['type'] == 'sequence':
 
                         self._runSequence(
-                            self.ioSettings[str(self.__class__.__name__).lower()]['sequences'][item['data']]
+                            self.ioSettings[str(self.__class__.__name__).lower()]['sequences'][item['data']],
+                            isChild=True
                         )
 
                     elif item['type'] == 'sleep':
@@ -187,10 +197,17 @@ class Display:
                     self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
                     break
 
+        if isChild == False:
+
+            if self.state == 'working': self.state = 'ready'
+
 
         return
     def _readWait(self):
         """Polls busy state. Ready = True. Timeout/error = False."""
+
+        if self.state == 'error': return False
+        self.state = 'waiting'
 
         tries = 0
 
@@ -200,6 +217,7 @@ class Display:
 
                 if not self.GPIO.input(self._getNamedPinValue('busy', 'gpio')) < 0.5:
 
+                    self.state = 'ready'
                     return True
 
             except Exception as e:
@@ -210,6 +228,8 @@ class Display:
 
             tries += 1
             time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['busy_wait'] / 1000.0)
+
+        self.state = 'ready'
 
 
         return False

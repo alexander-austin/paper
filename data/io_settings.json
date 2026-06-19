@@ -607,7 +607,8 @@
                     "data": "turn_on"
                 }
             ]
-        }
+        },
+        "endpoints": {}
     },
     "mpu6050": {
         "bus": 1,
@@ -631,7 +632,13 @@
                 "z": 71
             }
         },
-        "smoothing": 10
+        "smoothing": 10,
+        "endpoints": {
+            "poll": {
+                "method": "POST",
+                "endpoint": "/api/<api_version>/hardware/orientation"
+            }
+        }
     },
     "gpinput": {
         "durations": {
@@ -647,7 +654,8 @@
                 "max": 6.0
             }
         },
-        "double": true
+        "double": true,
+        "endpoints": {}
     },
     "pins": {
         "01": {

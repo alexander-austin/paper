@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from . import paths, apiSettings, server
+from . import paths, apiSettings, server, display
 from flask import jsonify, make_response, request, send_file
 from werkzeug.utils import secure_filename
 
@@ -29,28 +29,76 @@ def media(apiVersion, mediaPath):
 
                     return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': metadataFormatted()}), 200
 
-                elif '.' in mediaPath:
+                elif '.' in mediaPath and not '/' in mediaPath:
 
-                    pass
+                    return downloadMediaFile__v1(mediaPath)
 
         elif request.method == 'PUT':
 
-            if mediaPath == 'new':
+            if len(mediaPath) > 0:
 
-                return uploadMediaFile__v1()
+                if mediaPath == 'new':
+
+                    # TODO: validation
+                    return uploadMediaFile__v1(requestData)
 
         elif request.method == 'POST':
 
-            pass
+            if len(mediaPath) > 0:
+
+                if '.' in mediaPath and not '/' in mediaPath:
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        # TODO: validation
+                        if not 'file' in requestData.keys(): requestData['file'] = mediaPath.split('?')[0]
+
+                        metadataUpdateMedia(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
 
         elif request.method == 'DELETE':
 
-            pass
+            if len(mediaPath) > 0:
+
+                if '.' in mediaPath and not '/' in mediaPath:
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        # TODO: validation
+                        if not 'file' in requestData.keys(): requestData['file'] = mediaPath.split('?')[0]
+
+                        metadataDeleteMedia(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
 
 
     return jsonify({'error': 'Bad Request', 'api_version': apiVersion}), 400
 
 
+# Download media file
+def downloadMediaFile__v1(fileName):
+    """Download media file if exists."""
+
+    #queryParams = fileName.split('?', 2)[-1]
+    fileName = fileName.split('?')[0]
+
+    filePath = metadataFileNameExists(fileName)
+
+    if isinstance(filePath, str):
+
+        import os
+
+        if os.path.exists(filePath):
+
+            return send_file(filePath), 200
+
+
+    return jsonify({'error': 'Not Found', 'api_version': 'v1'}), 404
 # Upload media file
 def uploadMediaFile__v1():
     """Upload file."""
@@ -82,7 +130,7 @@ def uploadMediaFile__v1():
                     requestSecureFileName
                 )
 
-                if not metadataFileNameExists(requestSecureFileName) and not os.path.exists(tempPath) and not os.path.exists(localPath):
+                if not isinstance(metadataFileNameExists(requestSecureFileName), str) and not os.path.exists(tempPath) and not os.path.exists(localPath):
 
                     requestFile.save(tempPath)
 
@@ -136,43 +184,93 @@ def uploadMediaFile__v1():
     return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1'}), 500
 
 
-# Metadata
-def metadataFileNameExists(fileName, checkThumbnails=True):
-    """Check whether file name exists in metadata."""
+@server.route('/api/<path:apiVersion>/hardware/<path:hardwarePath>', methods=['GET', 'POST'])
+def hardware(apiVersion, hardwarePath):
+    """Hardware routing handler."""
 
-    from utils import jsonLoad
+    if apiVersion == 'v1':
 
-    metadata = jsonLoad(paths['metadata']['path'])
+        if request.method == 'GET':
 
-    for media in metadata['media']:
+            if len(hardwarePath) > 0:
 
-        if media['file'] == fileName:
+                pass
 
-            return True
-        
-        if checkThumbnails == True:
+        elif request.method == 'POST':
 
-            for mediaThumbnail in media['thumbnails']:
+            if len(hardwarePath) > 0:
 
-                if mediaThumbnail['file'] == fileName:
-
-                    return True
+                pass
 
 
-    return False
-def metadataAppendMedia(media):
-    """Append media to metadata."""
+    return jsonify({'error': 'Bad Request', 'api_version': apiVersion}), 400
 
-    from utils import jsonLoad, jsonSave
 
-    metadata = jsonLoad(paths['metadata']['path'])
+def displayMediaFile__v1(fileName):
+    """Display media."""
 
-    metadata['media'].append(media)
+    #queryParams = fileName.split('?', 2)[-1]
+    fileName = fileName.split('?')[0]
 
-    jsonSave(metadata, paths['metadata']['path'])
+    filePath = metadataFileNameExists(fileName)
+
+    if isinstance(filePath, str):
+
+        import os
+
+        if os.path.exists(filePath):
+
+            if not display is None:
+
+                from utils.Imager import Imager
+
+                imager = Imager()
+
+                quantizedBuffer = imager.getQuantizedBuffer(filePath)
+
+                if len(quantizedBuffer) > 0:
+
+                    if display.state == 'ready':
+
+                        display.displayBufferedBytes(quantizedBuffer)
+
+                    else:
+
+                        return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1', 'detail': 'display not ready'}), 500
+
+                else:
+
+                    return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1', 'detail': 'unable to quantize image'}), 500
+
+            else:
+
+                return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1', 'detail': 'display not initialized'}), 500
+
+        else:
+
+            return jsonify({'status': 'error', 'error': 'Not Found', 'api_version': 'v1'}), 404
+
+    else:
+
+            return jsonify({'status': 'error', 'error': 'Not Found', 'api_version': 'v1'}), 404
+
+
+    return jsonify({'status': 'error', 'error': 'Internal Server Error', 'api_version': 'v1'}), 500
+
+
+# Hardware
+def initHardware():
+    """Initialize hardware."""
+
+    from hardware.Display import Display
+
+    display = Display()
 
 
     return
+
+
+# Metadata
 def metadataFormatted():
     """Format metadata to send."""
 
@@ -215,10 +313,101 @@ def metadataFormatted():
 
     metadata = jsonLoad(paths['metadata']['path'])
 
-    formattedMetadata = formattedValue(metadata)
+    formattedMetadata = formattedValue(metadata, excludeKeys)
 
 
     return formattedMetadata
+def metadataFileNameExists(fileName, checkThumbnails=True):
+    """Check whether file name exists in metadata."""
+
+    from utils import jsonLoad
+
+    metadata = jsonLoad(paths['metadata']['path'])
+
+    for media in metadata['media']:
+
+        if media['file'] == fileName:
+
+            return media['path']
+        
+        if checkThumbnails == True:
+
+            for mediaThumbnail in media['thumbnails']:
+
+                if mediaThumbnail['file'] == fileName:
+
+                    return media['path']
+
+
+    return False
+def metadataAppendMedia(media):
+    """Append media to metadata."""
+
+    from utils import jsonLoad, jsonSave
+
+    metadata = jsonLoad(paths['metadata']['path'])
+
+    metadata['media'].append(media)
+
+    jsonSave(metadata, paths['metadata']['path'])
+
+
+    return
+def metadataUpdateMedia(media):
+    """Update metadata within media."""
+
+    from utils import jsonLoad, jsonSave
+
+    metadata = jsonLoad(paths['metadata']['path'])
+
+    for m in range(len(metadata['media'])):
+
+        if metadata['media'][m]['file'] == media['file']:
+
+            for mediaKey in media.keys():
+
+                if not mediaKey in ['file', 'path', 'thumbnails']:
+
+                    metadata['media'][m][mediaKey] = media[mediaKey]
+
+
+            jsonSave(metadata, paths['metadata']['path'])
+
+            break
+
+
+    return
+def metadataDeleteMedia(media):
+    """Delete metadata within media."""
+
+    from utils import jsonLoad, jsonSave
+
+    metadata = jsonLoad(paths['metadata']['path'])
+
+    for m in range(len(metadata['media'])):
+
+        if metadata['media'][m]['file'] == media['file']:
+
+            deletedMedia = metadata['media'].pop(m)
+
+            jsonSave(metadata, paths['metadata']['path'])
+
+            import os
+
+            if os.path.exists(deletedMedia['path']):
+
+                os.remove(deletedMedia['path'])
+
+            for deletedMediaThumbnail in deletedMedia['thumbnails']:
+
+                if os.path.exists(deletedMediaThumbnail['path']):
+
+                    os.remove(deletedMediaThumbnail['path'])
+
+            break
+
+
+    return
 
 
 # Static files
