@@ -106,8 +106,8 @@ def getPaths():
                 'templates'
             )
         },
-        'metadata': {
-            'type': 'json',
+        'database': {
+            'type': 'db',
             'publish': False,
             'path': os.path.join(
                 os.path.dirname(
@@ -116,9 +116,22 @@ def getPaths():
                     )
                 ),
                 'data',
-                'metadata.json'
+                'paper.db'
             )
         },
+        #'metadata': {
+        #    'type': 'json',
+        #    'publish': False,
+        #    'path': os.path.join(
+        #        os.path.dirname(
+        #            os.path.dirname(
+        #                os.path.realpath(__file__)
+        #            )
+        #        ),
+        #        'data',
+        #        'metadata.json'
+        #    )
+        #},
         'io_settings': {
             'type': 'json',
             'publish': False,

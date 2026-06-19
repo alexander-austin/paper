@@ -7,6 +7,11 @@
         }
     },
     "handlers": {
+        "database_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "generic"
+        },
         "display_handler": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
@@ -29,6 +34,12 @@
         }
     },
     "loggers": {
+        "database": {
+            "level": "DEBUG",
+            "handlers": [
+                "database_handler"
+            ]
+        },
         "display": {
             "level": "DEBUG",
             "handlers": [
