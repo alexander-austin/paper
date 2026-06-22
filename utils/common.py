@@ -386,7 +386,6 @@ def setup():
                 )
                 dbCursor = dbConnection.cursor()
 
-                ## TODO:
                 dbCursor.execute(
                     """
                     CREATE TABLE media (
@@ -402,6 +401,7 @@ def setup():
                     );
                     """
                 )
+                dbConnection.commit()
 
                 dbCursor.execute(
                     """
@@ -415,9 +415,8 @@ def setup():
                     );
                     """
                 )
-                ##
-
                 dbConnection.commit()
+
                 dbCursor.close()
                 dbConnection.close()
 

@@ -131,6 +131,12 @@ class Database:
         },
         'playlist': {
             'allow_extra_keys': False,
+            'active': {
+                'required': True,
+                'types': ['bool'],
+                'json_include': True,
+                'extra': []
+            },
             'name': {
                 'required': True,
                 'types': ['str'],
@@ -662,8 +668,57 @@ class Database:
         return
 
     # Playlist
-    def _playlistGenerate(self, name, mode, sorts, filters):
-        """."""
+    def _playlistPopulate(self, name, mode, sorts, filters, media=None, save=True):
+        """Add new playlist or update existing."""
+
+        def filterPass(value, filterCondition, filterValue):
+
+            if filterCondition == 'equal':
+
+                if value == filterValue: return True
+
+            elif filterCondition == 'not equal':
+
+                if not value == filterValue: return True
+
+            elif filterCondition == 'in':
+
+                if value in filterValue: return True
+
+            elif filterCondition == 'not in':
+
+                if not value in filterValue: return True
+
+            elif filterCondition == 'greater than':
+
+                if value > filterValue: return True
+
+            elif filterCondition == 'greater than or equal':
+
+                if value >= filterValue: return True
+
+            elif filterCondition == 'less than':
+
+                if value < filterValue: return True
+
+            elif filterCondition == 'less than or equal':
+
+                if value <= filterValue: return True
+
+            elif filterCondition == 'between':
+
+                if value > filterValue[0] and value < filterValue[1]: return True
+
+            elif filterCondition == 'between or equal':
+
+                if value >= filterValue[0] and value <= filterValue[1]: return True
+
+
+            return False
+
+        if media is None:
+
+            media = self._mediaGet()
 
         playlist = {
             'name': name,
@@ -674,8 +729,85 @@ class Database:
             'files': []
         }
 
+        if isinstance(media, list):
+
+            if len(media) > 0:
+
+                filteredMedia = []
+
+                # Filter
+                for m in range(len(media)):
+
+                    if len(playlist['filters']) > 0:
+
+                        passFilter = []
+
+                        for filter in sorted(playlist['filters'], lambda f: f['priority']):
+
+                            if filter['key'] == 'uploaded':
+
+                                passFilter.append(filterPass(media[m]['uploaded'], filter['condition'], filter['value']))
+
+                            elif filter['key'] == 'created':
+
+                                passFilter.append(filterPass(media[m]['created'], filter['condition'], filter['value']))
+
+                            elif filter['key'] == 'tags':
+
+                                passFilter.append(all([filterPass(tag['name'], filter['condition'], filter['value']) for tag in media[m]['tags']]) == True)
+
+                        if all(passFilter) == True:
+
+                            filteredMedia.append(media[m])
+
+                    else:
+
+                        filteredMedia.append(media[m])
+
+                # Sort
+                if len(filteredMedia) > 0:
+
+                    if len(playlist['sorts']) > 0:
+
+                        for sorter in sorted(playlist['sorts'], lambda s: s['priority']):
+
+                            filteredMedia = sorted(
+                                filteredMedia,
+                                lambda fm: fm[sorter['key']],
+                                reverse=False if sorter['direction'] == 'ASC' else True
+                            )
+
+                playlist['files'] = filteredMedia
+
+        if save == True:
+
+            self._playlistAdd(playlist)
+
 
         return playlist
+    def _playlistsPopulate(self, save=True):
+        """Populate files of all playlists."""
+
+        media = self._mediaGet()
+        playlists = self._playlistGet()
+
+        for p in range(len(playlists)):
+
+            playlists[p] = self._playlistPopulate(
+                playlists[p]['name'],
+                playlists[p]['mode'],
+                playlists[p]['sorts'],
+                playlists[p]['filters'],
+                media=media,
+                save=False
+            )
+
+        if save == True:
+
+            self._playlistUpdate(playlists)
+
+
+        return playlists
 
     def _playlistGet(self, playlist=None, media=None):
         """Get playlist from db."""
@@ -687,12 +819,13 @@ class Database:
                 import json
 
                 playlistResult = {
-                    'name': result[0],
-                    'mode': result[1],
-                    'filters': json.loads(result[1]),
-                    'sorts': json.loads(result[3]),
-                    'index': result[4],
-                    'files': json.loads(result[5])
+                    'active': True if result[0] == 1 else False,
+                    'name': result[1],
+                    'mode': result[2],
+                    'filters': json.loads(result[3]),
+                    'sorts': json.loads(result[4]),
+                    'index': result[5],
+                    'files': json.loads(result[6])
                 }
 
 
@@ -715,7 +848,7 @@ class Database:
 
             return dbResultsToPlaylists(
                 self._dbGet(
-                    'SELECT name, mode, filters, sorts, [index], files FROM playlist ORDER BY name ASC;',
+                    'SELECT active, name, mode, filters, sorts, [index], files FROM playlist ORDER BY name ASC;',
                     closeOnExit=True
                 )
             )
@@ -726,7 +859,7 @@ class Database:
 
                 return dbResultsToPlaylists(
                     self._dbGet(
-                        'SELECT name, mode, filters, sorts, [index], files FROM playlist WHERE name = ? ORDER BY name ASC;',
+                        'SELECT active, name, mode, filters, sorts, [index], files FROM playlist WHERE name = ? ORDER BY name ASC;',
                         values=(
                             playlist['name'],
                         ),
@@ -747,6 +880,7 @@ class Database:
 
             values = tuple(
                 [
+                    1 if playlist['active'] == True else 0,
                     playlist['name'],
                     playlist['mode'],
                     json.dumps(playlist['filters']) if 'filters' in playlist.keys() else None,
@@ -760,6 +894,7 @@ class Database:
 
             values = tuple(
                 [
+                    1 if playlist['active'] == True else 0,
                     playlist['mode'],
                     json.dumps(playlist['filters']) if 'filters' in playlist.keys() else None,
                     json.dumps(playlist['sorts']) if 'sorts' in playlist.keys() else None,
@@ -775,7 +910,7 @@ class Database:
         """Add new playlist."""
 
         self._dbModify(
-            'INSERT INTO playlist (name, mode, filters, sorts, [index], files) VALUES (?, ?, ?, ?, ?, ?);',
+            'INSERT INTO playlist (active, name, mode, filters, sorts, [index], files) VALUES (?, ?, ?, ?, ?, ?, ?);',
             values=[self._playlistToDbValues(p, False) for p in playlist] if isinstance(playlist, list) else self._playlistToDbValues(playlist, False),
             closeOnExit=True
         )
@@ -786,7 +921,7 @@ class Database:
         """Update existing playlist."""
 
         self._dbModify(
-            'UPDATE playlist SET mode = ?, filters = ?, sorts = ?, [index] = ?, files = ? WHERE name = ?;',
+            'UPDATE playlist SET active = ?, mode = ?, filters = ?, sorts = ?, [index] = ?, files = ? WHERE name = ?;',
             values=[self._playlistToDbValues(p, True) for p in playlist] if isinstance(playlist, list) else self._playlistToDbValues(playlist, True),
             closeOnExit=True
         )
