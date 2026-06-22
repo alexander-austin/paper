@@ -402,6 +402,19 @@ def setup():
                     );
                     """
                 )
+
+                dbCursor.execute(
+                    """
+                    CREATE TABLE playlist (
+                        name    TEXT    NOT NULL ON CONFLICT ROLLBACK UNIQUE ON CONFLICT ROLLBACK,
+                        mode    TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (mode = 'sequential' OR mode = 'shuffle'),
+                        filters TEXT,
+                        sorts   TEXT,
+                        [index] INTEGER NOT NULL ON CONFLICT ROLLBACK DEFAULT (0),
+                        files   TEXT
+                    );
+                    """
+                )
                 ##
 
                 dbConnection.commit()

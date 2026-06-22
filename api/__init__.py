@@ -11,11 +11,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
-from utils import getPaths, jsonLoad
+from utils import getPaths, jsonLoad, Database
 
 
 paths = getPaths()
 apiSettings = jsonLoad(paths['api_settings']['path'])
+database = Database()
 display = None
 displayCurrentFilePath = ''
 orientation = {}

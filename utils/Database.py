@@ -80,6 +80,114 @@ class Database:
                 'json_include': True,
                 'extra': ['stringLengthGreaterThanZero']
             }
+        },
+        'sort': {
+            'allow_extra_keys': False,
+            'priority': {
+                'required': True,
+                'types': ['int'],
+                'json_include': True,
+                'extra': ['intGreaterThanOrEqualToZero']
+            },
+            'key': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero']
+            },
+            'direction': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero', 'stringPlaylistSortDirection']
+            }
+        },
+        'filter': {
+            'allow_extra_keys': False,
+            'priority': {
+                'required': True,
+                'types': ['int'],
+                'json_include': True,
+                'extra': ['intGreaterThanOrEqualToZero']
+            },
+            'key': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero']
+            },
+            'condition': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero']
+            },
+            'value': {
+                'required': True,
+                'types': ['str', 'bool', 'int', 'float', 'media', 'tag', 'str_list', 'bool_list', 'int_list', 'float_list', 'media_list', 'tag_list'],
+                'json_include': True,
+                'extra': []
+            }
+        },
+        'playlist': {
+            'allow_extra_keys': False,
+            'name': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero']
+            },
+            'mode': {
+                'required': True,
+                'types': ['str'],
+                'json_include': True,
+                'extra': ['stringLengthGreaterThanZero', 'stringPlaylistMode']
+            },
+            'sorts': {
+                'required': False,
+                'types': ['sort_list'],
+                'json_include': True,
+                'extra': []
+            },
+            'filters': {
+                'required': False,
+                'types': ['filter_list'],
+                'json_include': True,
+                'extra': []
+            },
+            'index': {
+                'required': True,
+                'types': ['int'],
+                'json_include': True,
+                'extra': ['intGreaterThanOrEqualToZero']
+            },
+            'files': {
+                'required': True,
+                'types': ['str_list'],
+                'json_include': True,
+                'extra': ['listLengthGreaterThanZero']
+            }
+        },
+        'metadata': {
+            'allow_extra_keys': False,
+            'media': {
+                'required': True,
+                'types': ['media_list'],
+                'json_include': True,
+                'extra': []
+            },
+            'playlists': {
+                'required': False,
+                'types': ['playlist_list'],
+                'json_include': True,
+                'extra': []
+            },
+            'tags': {
+                'required': False,
+                'types': ['str_list'],
+                'json_include': True,
+                'extra': []
+            }
         }
     }
 
@@ -107,6 +215,78 @@ class Database:
 
 
         return metadata
+    def metadataMediaFileExists(self, fileName):
+        """Check if file exists on disk or in DB."""
+
+        import os
+
+        media = self._mediaGet()
+
+        for m in range(len(media)):
+
+            if media[m]['file'] == fileName:
+
+                if os.path.exists(media[m]['path']):
+
+                    return media[m]
+
+            for t in range(len(media[m]['thumbnails'])):
+
+                if media[m]['thumbnails'][t]['file'] == fileName:
+
+                    if os.path.exists(media[m]['thumbnails'][t]['path']):
+
+                        return media[m]['thumbnails'][t]
+
+        if os.path.exists(os.path.join(self.paths['media']['path'], fileName)):
+
+            return True
+
+        if os.path.exists(os.path.join(self.paths['temp']['path'], fileName)):
+
+            return True
+
+
+        return False
+    def metadataMediaAdd(self, media):
+        """Add media to db."""
+
+        if self._validItem('media', media) == True:
+
+            existingMedia = self.metadataFileExists(media['file'])
+
+            if isinstance(existingMedia, bool) and existingMedia == False:
+
+                self._mediaAdd(media)
+
+
+        return
+    def metadataMediaUpdate(self, media):
+        """Add media to db."""
+
+        if self._validItem('media', media) == True:
+
+            existingMedia = self.metadataFileExists(media['file'])
+
+            if isinstance(existingMedia, bool) and existingMedia == False:
+
+                self._mediaUpdate(media)
+
+
+        return
+    def metadataMediaDelete(self, media):
+        """Add media to db."""
+
+        if self._validItem('media', media) == True:
+
+            existingMedia = self.metadataFileExists(media['file'])
+
+            if isinstance(existingMedia, bool) and existingMedia == False:
+
+                self._mediaDelete(media)
+
+
+        return
 
 
     # Database queries
@@ -259,6 +439,8 @@ class Database:
 
             def dbResultToMedia(result):
 
+                import json
+
                 mediaResult = {
                     'type': result[0],
                     'file': result[2],
@@ -280,8 +462,6 @@ class Database:
 
 
                 return mediaResult
-
-            import json
 
             mediaResults = []
             thumbnailResults = []
@@ -316,7 +496,7 @@ class Database:
 
             return dbResultsToMedias(
                 self._dbGet(
-                    'SELECT type, parent, file, path, size, bytes, uploaded, created, tags FROM media;',
+                    'SELECT type, parent, file, path, size, bytes, uploaded, created, tags FROM media ORDER BY uploaded DESC;',
                     closeOnExit=True
                 )
             )
@@ -327,7 +507,7 @@ class Database:
 
                 return dbResultsToMedias(
                     self._dbGet(
-                        'SELECT type, parent, file, path, size, bytes, uploaded, created, tags FROM media WHERE file = ? OR parent = ?;',
+                        'SELECT type, parent, file, path, size, bytes, uploaded, created, tags FROM media WHERE file = ? OR parent = ? ORDER BY uploaded DESC;',
                         values=(
                             media['file'],
                             media['file']
@@ -430,42 +610,51 @@ class Database:
 
         self._dbModify(
             'INSERT INTO media (type, parent, file, path, size, bytes, uploaded, created, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            values=self._mediaToDbValues(media, False),
+            values=[self._mediaToDbValues(m, False) for m in media] if isinstance(media, list) else self._mediaToDbValues(media, False),
             closeOnExit=True
         )
 
 
         return
     def _mediaUpdate(self, media):
-        """Add new media."""
+        """Update existing media."""
 
         self._dbModify(
             'UPDATE media SET type = ?, parent = ?, path = ?, size = ?, bytes = ?, uploaded = ?, created = ?, tags = ? WHERE file = ?;',
-            values=self._mediaToDbValues(media, True),
+            values=[self._mediaToDbValues(m, True) for m in media] if isinstance(media, list) else self._mediaToDbValues(media, True),
             closeOnExit=True
         )
 
 
         return
     def _mediaDelete(self, media):
-        """Add new media."""
+        """Delete existing media."""
 
         import os
 
-        os.remove(media['path'])
+        if isinstance(media, dict): media = [media]
 
-        for thumbnail in media['thumbnails']:
+        if isinstance(media, list):
 
-            os.remove(thumbnail['path'])
+            for m in media:
+
+                os.remove(m['path'])
+
+                for thumbnail in m['thumbnails']:
+
+                    os.remove(thumbnail['path'])
+
+        else:
+
+            os.remove(media['path'])
+
+            for thumbnail in media['thumbnails']:
+
+                os.remove(thumbnail['path'])
 
         self._dbModify(
             'DELETE FROM media WHERE file = ? OR parent = ?;',
-            values=tuple(
-                [
-                    media['file'],
-                    media['file']
-                ]
-            ),
+            values=[tuple([m['file'], m['file']]) for m in media] if isinstance(media, list) else tuple([media['file'], media['file']]),
             closeOnExit=True
         )
 
@@ -473,28 +662,145 @@ class Database:
         return
 
     # Playlist
-    def _playlistGenerate(self):
+    def _playlistGenerate(self, name, mode, sorts, filters):
         """."""
+
+        playlist = {
+            'name': name,
+            'mode': mode,
+            'sorts': sorts,
+            'filters': filters,
+            'index': 0,
+            'files': []
+        }
+
+
+        return playlist
+
+    def _playlistGet(self, playlist=None, media=None):
+        """Get playlist from db."""
+
+        def dbResultsToPlaylists(results):
+
+            def dbResultToPlaylist(result):
+
+                import json
+
+                playlistResult = {
+                    'name': result[0],
+                    'mode': result[1],
+                    'filters': json.loads(result[1]),
+                    'sorts': json.loads(result[3]),
+                    'index': result[4],
+                    'files': json.loads(result[5])
+                }
+
+
+                return playlistResult
+
+            playlistResults = []
+
+            for result in results:
+
+                playlistResults.append(
+                    dbResultToPlaylist(result)
+                )
+
+            del results
+
+
+            return playlistResults
+
+        if playlist is None:
+
+            return dbResultsToPlaylists(
+                self._dbGet(
+                    'SELECT name, mode, filters, sorts, [index], files FROM playlist ORDER BY name ASC;',
+                    closeOnExit=True
+                )
+            )
+
+        else:
+
+            if 'name' in playlist.keys():
+
+                return dbResultsToPlaylists(
+                    self._dbGet(
+                        'SELECT name, mode, filters, sorts, [index], files FROM playlist WHERE name = ? ORDER BY name ASC;',
+                        values=(
+                            playlist['name'],
+                        ),
+                        closeOnExit=True
+                    )
+                )
 
 
         return
-    def _playlistFilter(self, originalPlaylist):
-        """."""
+    def _playlistToDbValues(self, playlist, updating=False):
+        """Playlist dict to db values tuple."""
+
+        import json
+
+        values = tuple()
+
+        if updating == False:
+
+            values = tuple(
+                [
+                    playlist['name'],
+                    playlist['mode'],
+                    json.dumps(playlist['filters']) if 'filters' in playlist.keys() else None,
+                    json.dumps(playlist['sorts']) if 'sorts' in playlist.keys() else None,
+                    playlist['index'],
+                    json.dumps(playlist['files']) if 'files' in playlist.keys() else None
+                ]
+            )
+
+        else:
+
+            values = tuple(
+                [
+                    playlist['mode'],
+                    json.dumps(playlist['filters']) if 'filters' in playlist.keys() else None,
+                    json.dumps(playlist['sorts']) if 'sorts' in playlist.keys() else None,
+                    playlist['index'],
+                    json.dumps(playlist['files']) if 'files' in playlist.keys() else None,
+                    playlist['name']
+                ]
+            )
 
 
-        return originalPlaylist
-    def _playlistSort(self, originalPlaylist):
-        """."""
+        return values
+    def _playlistAdd(self, playlist):
+        """Add new playlist."""
 
-
-        return originalPlaylist
-    def _playlistGet(self):
-        """."""
+        self._dbModify(
+            'INSERT INTO playlist (name, mode, filters, sorts, [index], files) VALUES (?, ?, ?, ?, ?, ?);',
+            values=[self._playlistToDbValues(p, False) for p in playlist] if isinstance(playlist, list) else self._playlistToDbValues(playlist, False),
+            closeOnExit=True
+        )
 
 
         return
-    def _playlistSave(self, playlist):
-        """."""
+    def _playlistUpdate(self, playlist):
+        """Update existing playlist."""
+
+        self._dbModify(
+            'UPDATE playlist SET mode = ?, filters = ?, sorts = ?, [index] = ?, files = ? WHERE name = ?;',
+            values=[self._playlistToDbValues(p, True) for p in playlist] if isinstance(playlist, list) else self._playlistToDbValues(playlist, True),
+            closeOnExit=True
+        )
+
+
+        return
+    def _playlistDelete(self, playlist):
+        """Delete existing playlist."""
+
+        self._dbModify(
+            'DELETE FROM playlist WHERE name = ?;',
+            values=[tuple([p['name'], ]) for p in playlist] if isinstance(playlist, list) else tuple([playlist['name'], ]),
+            closeOnExit=True
+        )
 
 
         return
@@ -540,12 +846,228 @@ class Database:
         return
     
     # Validation
+    def _itemToJson(self, itemType, item):
+        """Item to JSON."""
+
+        def valueToJsonKV(key, value, required, validTypes):
+
+            if value is None:
+
+                if required == True:
+
+                    return '"%(key)s": null' % {
+                        'key': key
+                    }
+
+            else:
+
+                if isinstance(value, str):
+
+                    if 'str' in validTypes:
+
+                        return '"%(key)s": "%(value)s"' % {
+                            'key': key,
+                            'value': value
+                        }
+
+                elif isinstance(value, bool):
+
+                    if 'bool' in validTypes:
+
+                        return '"%(key)s": %(value)s' % {
+                            'key': key,
+                            'value': 'trus' if value == True else 'false'
+                        }
+
+                elif isinstance(value, int):
+
+                    if 'int' in validTypes:
+
+                        return '"%(key)s": %(value)d' % {
+                            'key': key,
+                            'value': value
+                        }
+
+                elif isinstance(value, float):
+
+                    if 'float' in validTypes:
+
+                        return '"%(key)s": %(value)f' % {
+                            'key': key,
+                            'value': value
+                        }
+
+                elif isinstance(value, list):
+
+                    if len(value) > 0:
+
+                        if all([isinstance(v, str) for v in value]) == True:
+
+                            if 'str_list' in validTypes:
+
+                                return '"%(key)s": [%(values)s]' % {
+                                    'key': key,
+                                    'values': ', '.join(
+                                        [
+                                            '"%s"' % (v, )
+                                            for v in value
+                                        ]
+                                    )
+                                }
+
+                        elif all([isinstance(v, bool) for v in value]) == True:
+
+                            if 'bool_list' in validTypes:
+
+                                return '"%(key)s": [%(values)s]' % {
+                                    'key': key,
+                                    'values': ', '.join(
+                                        [
+                                            'true' if v == True else 'false'
+                                            for v in value
+                                        ]
+                                    )
+                                }
+
+                        elif all([isinstance(v, int) for v in value]) == True:
+
+                            if 'int_list' in validTypes:
+
+                                return '"%(key)s": [%(values)s]' % {
+                                    'key': key,
+                                    'values': ', '.join(
+                                        [
+                                            '%d' % (v, )
+                                            for v in value
+                                        ]
+                                    )
+                                }
+
+                        elif all([isinstance(v, float) for v in value]) == True:
+
+                            if 'float_list' in validTypes:
+
+                                return '"%(key)s": [%(values)s]' % {
+                                    'key': key,
+                                    'values': ', '.join(
+                                        [
+                                            '%f' % (v, )
+                                            for v in value
+                                        ]
+                                    )
+                                }
+
+                        elif all([isinstance(v, dict) for v in value]) == True:
+
+                            for validType in validTypes:
+
+                                if len(validType.split('_')) == 2:
+
+                                    if validType.split('_')[-1] == 'list' and validType.split('_')[0] in self.validation.keys():
+
+                                        if all([self._validItem(validType, v) == True for v in value]) == True:
+
+                                            return '"%(key)s": [%(values)s]' % {
+                                                'key': key,
+                                                'values': ', '.join(
+                                                    [
+                                                        self._itemToJson(validType, v)
+                                                        for v in value
+                                                    ]
+                                                )
+                                            }
+
+                    else:
+
+                        if required == True:
+
+                            return '"%(key)s": []' % {
+                                'key': key
+                            }
+
+                elif isinstance(value, dict):
+
+                    for validType in validTypes:
+
+                        if validType in self.validation.keys():
+
+                            if self._validItem(validType, value) == True:
+
+                                return '"%(key)s": %(value)s' % {
+                                    'key': key,
+                                    'value': self._itemToJson(validType, value)
+                                }
+
+
+            return None
+
+        if not isinstance(item, dict):
+
+            if isinstance(item, list):
+
+                return '[%(items)s]' % {
+                    'items': ', '.join(
+                        [
+                            self._itemToJson(itemType, i)
+                            for i in item
+                        ]
+                    )
+                }
+
+            else:
+
+                return False
+
+        if len(item.keys()) == 0:
+
+            return False
+
+        if itemType in self.validation.keys():
+
+            kvPairs = []
+
+            for validationKey in self.validation[itemType].keys():
+
+                if isinstance(self.validation[itemType][validationKey], dict):
+
+                    if validationKey in item.keys() and self.validation[itemType][validationKey]['json_include'] == True:
+
+                        kv = valueToJsonKV(
+                            validationKey,
+                            item[validationKey],
+                            self.validation[itemType][validationKey]['required'],
+                            self.validation[itemType][validationKey]['types']
+                        )
+
+                        if not kv is None:
+
+                            kvPairs.append(kv)
+
+            if len(kvPairs) > 0:
+
+                return '{%(kv_pairs)s}' % {
+                    'kv_pairs': ', '.join(kvPairs)
+                }
+
+
+        return ''
     def _validItem(self, itemType, item):
         """Validate an item."""
 
         if not isinstance(item, dict):
 
-            return False
+            if isinstance(item, list):
+
+                return all(
+                    [
+                        self._validItem(itemType, i)
+                        for i in item
+                    ]
+                )
+
+            else:
+
+                return False
 
         if len(item.keys()) == 0:
 
@@ -743,6 +1265,16 @@ class Database:
 
         return True
     def stringLengthGreaterThanZero(self, value):
+        return True if len(value) > 0 else False
+    def stringPlaylistSortDirection(self, value):
+        return True if value in ['ASC', 'DESC'] else False
+    def stringPlaylistFilterCondition(self, value):
+        return True if value in ['equal', 'not equal', 'in', 'not in', 'greater than', 'greater than or equal', 'less than', 'less than or equal', 'between', 'between or equal'] else False
+    def stringPlaylistMode(self, value):
+        return True if value in ['shuffle', 'sequential'] else False
+    def intGreaterThanOrEqualToZero(self, value):
+        return True if value >= 0 else False
+    def listLengthGreaterThanZero(self, value):
         return True if len(value) > 0 else False
     def listLengthIsTwo(self, value):
         return True if len(value) == 2 else False
