@@ -149,6 +149,7 @@ def uploadMediaFile__v1():
 
                         os.rename(tempPath, localPath)
 
+                        requestFileInfo['type'] = 'original'
                         requestFileInfo['file'] = requestSecureFileName
                         requestFileInfo['uri'] = '/media/%(request_secure_file_name)s' % {
                             'request_secure_file_name': requestSecureFileName

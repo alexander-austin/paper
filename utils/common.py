@@ -119,19 +119,6 @@ def getPaths():
                 'paper.db'
             )
         },
-        #'metadata': {
-        #    'type': 'json',
-        #    'publish': False,
-        #    'path': os.path.join(
-        #        os.path.dirname(
-        #            os.path.dirname(
-        #                os.path.realpath(__file__)
-        #            )
-        #        ),
-        #        'data',
-        #        'metadata.json'
-        #    )
-        #},
         'io_settings': {
             'type': 'json',
             'publish': False,
@@ -169,6 +156,19 @@ def getPaths():
                 ),
                 'data',
                 'logging.json'
+            )
+        },
+        'database_log': {
+            'type': 'log',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'data',
+                'database.log'
             )
         },
         'display_log': {
@@ -364,3 +364,80 @@ def timestampToString(epochTimestamp):
     from datetime import datetime, timezone
     if not isinstance(epochTimestamp, int) and not isinstance(epochTimestamp, float): return ''
     return str(datetime.fromtimestamp(epochTimestamp, tz=timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f'))[0:-3]
+
+# First run setup
+def setup():
+    """Checks if necessary first run tasks have been completed and, if not, completes them."""
+
+    def setupDatabase(paths):
+
+        try:
+
+            import os, sqlite3
+
+            # Create database if missing
+            if not os.path.exists(paths['database']['path']):
+
+                print('creating database...')
+
+                dbConnection = sqlite3.connect(
+                    paths['database']['path'],
+                    check_same_thread=False
+                )
+                dbCursor = dbConnection.cursor()
+
+                ## TODO:
+                dbCursor.execute(
+                    """
+                    CREATE TABLE media (
+                        type     TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (type = 'original' OR type = 'thumbnail'),
+                        parent   TEXT,
+                        file     TEXT    NOT NULL ON CONFLICT ROLLBACK UNIQUE ON CONFLICT ROLLBACK,
+                        path     TEXT    UNIQUE ON CONFLICT ROLLBACK NOT NULL ON CONFLICT ROLLBACK,
+                        size     TEXT    NOT NULL ON CONFLICT ROLLBACK,
+                        bytes    INTEGER NOT NULL ON CONFLICT ROLLBACK,
+                        uploaded REAL    NOT NULL ON CONFLICT ROLLBACK,
+                        created  REAL,
+                        tags     TEXT
+                    );
+                    """
+                )
+                ##
+
+                dbConnection.commit()
+                dbCursor.close()
+                dbConnection.close()
+
+            # Check database
+            else:
+
+                dbConnection = sqlite3.connect(
+                    paths['database']['path'],
+                    check_same_thread=False
+                )
+                dbCursor = dbConnection.cursor()
+
+                ##
+
+                dbCursor.close()
+                dbConnection.close()
+
+        except Exception as e:
+
+            print('database setup failed')
+            return False
+
+
+        return False
+
+    paths = getPaths()
+
+    databaseSetup = setupDatabase(paths)
+
+    if databaseSetup == False:
+
+        print('could not setup database')
+        return
+
+
+    return True

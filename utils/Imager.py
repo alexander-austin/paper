@@ -32,7 +32,15 @@ class Imager:
     def getImageInfo(self, imagePath):
         """Get image stats from path."""
 
-        imageInfo = {}
+        import os
+        from ..utils import timestampEpoch
+
+        imageInfo = {
+            'file': imagePath.split(os.sep)[-1].split('?')[0],
+            'path': imagePath,
+            'uploaded': timestampEpoch(),
+            'created': timestampEpoch() # TODO: exif extraction
+        }
 
         if os.path.exists(imagePath):
 
@@ -40,6 +48,8 @@ class Imager:
             rawImage = ImageOps.exif_transpose(rawImage)
 
             imageInfo['size'] = rawImage.size
+
+            imageInfo['bytes'] = os.path.getsize(imagePath)
 
 
         return imageInfo
@@ -59,8 +69,11 @@ class Imager:
     def generateThumbnails(self, imagePath):
         """Generate thumbnails."""
 
+        from ..utils import timestampEpoch
+
         thumbnailPathsAndSizes = [
             {
+                'type': 'thumbnail',
                 'file': '%(base)s_%(w)dx%(h)d.jpg' % {
                     'base': str(imagePath.rsplit(os.sep, 1)[-1]).rsplit('.', 1)[0],
                     'w': thumbnailSize['width'],
@@ -82,13 +95,19 @@ class Imager:
             for thumbnailSize in self.ioSettings['display']['thumbnails']
         ]
 
-        for thumbnailPathAndSize in thumbnailPathsAndSizes:
+        for t in range(len(thumbnailPathsAndSizes)):
 
             self._generateThumbnail(
                 imagePath,
-                thumbnailPathAndSize['path'],
-                thumbnailPathAndSize['size']
+                thumbnailPathsAndSizes[t]['path'],
+                thumbnailPathsAndSizes[t]['size']
             )
+
+            if os.path.exists(thumbnailPathsAndSizes[t]['path']):
+
+                thumbnailPathsAndSizes[t]['bytes'] = os.path.getsize(thumbnailPathsAndSizes[t]['path'])
+                thumbnailPathsAndSizes[t]['uploaded'] = timestampEpoch()
+                thumbnailPathsAndSizes[t]['created'] = timestampEpoch()
 
 
         return thumbnailPathsAndSizes
