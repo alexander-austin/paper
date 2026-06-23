@@ -369,7 +369,7 @@ def timestampToString(epochTimestamp):
 def setup():
     """Checks if necessary first run tasks have been completed and, if not, completes them."""
 
-    def setupDatabase(paths):
+    def setupDatabase(paths, ioSettings):
 
         try:
 
@@ -406,15 +406,70 @@ def setup():
                 dbCursor.execute(
                     """
                     CREATE TABLE playlist (
-                        name    TEXT    NOT NULL ON CONFLICT ROLLBACK UNIQUE ON CONFLICT ROLLBACK,
-                        mode    TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (mode = 'sequential' OR mode = 'shuffle'),
-                        filters TEXT,
-                        sorts   TEXT,
-                        [index] INTEGER NOT NULL ON CONFLICT ROLLBACK DEFAULT (0),
-                        files   TEXT
+                        active   INTEGER NOT NULL ON CONFLICT ROLLBACK DEFAULT (0)  CHECK (active = 0 OR active = 1),
+                        name     TEXT    NOT NULL ON CONFLICT ROLLBACK UNIQUE ON CONFLICT ROLLBACK,
+                        interval REAL    NOT NULL ON CONFLICT ROLLBACK DEFAULT (30.0),
+                        mode     TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (mode = 'sequential' OR mode = 'shuffle'),
+                        filters  TEXT,
+                        sorts    TEXT,
+                        [index]  INTEGER NOT NULL ON CONFLICT ROLLBACK DEFAULT (0),
+                        files    TEXT
                     );
                     """
                 )
+                dbConnection.commit()
+
+                dbCursor.execute(
+                    """
+                    CREATE TABLE state (
+                        timestamp REAL    NOT NULL ON CONFLICT ROLLBACK,
+                        component TEXT    NOT NULL ON CONFLICT ROLLBACK,
+                        type      TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (type = 'event' OR type = 'state'),
+                        value     TEXT    NOT NULL ON CONFLICT ROLLBACK,
+                        pending   INTEGER NOT NULL ON CONFLICT ROLLBACK DEFAULT (1) CHECK (pending = 0 OR pending = 1) 
+                    );
+                    """
+                )
+                dbConnection.commit()
+
+                dbCursor.execute(
+                    'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+                    (
+                        timestampEpoch(),
+                        'display',
+                        'state',
+                        '{"state": "offline"}',
+                        0
+                    )
+                )
+                dbCursor.execute(
+                    'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+                    (
+                        timestampEpoch(),
+                        'mpu6050',
+                        'state',
+                        '{"state": "offline"}',
+                        0
+                    )
+                )
+
+                for pin in ioSettings['pins']:
+
+                    if pin['owner'] == 'gpinput' and pin['active'] == True:
+
+                        dbCursor.execute(
+                            'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+                            (
+                                timestampEpoch(),
+                                'gpio_%(gpio)s' % {
+                                    'gpio': str('00%d' % (pin['gpio'], ))[-2:]
+                                },
+                                'state',
+                                '{"state": "offline"}',
+                                0
+                            )
+                        )
+
                 dbConnection.commit()
 
                 dbCursor.close()
@@ -429,7 +484,14 @@ def setup():
                 )
                 dbCursor = dbConnection.cursor()
 
-                ##
+                dbCursor.execute(
+                    'UPDATE state SET value = ?, pending = ? WHERE type = ?;',
+                    (
+                        '{"state": "offline"}',
+                        0,
+                        'component'
+                    )
+                )
 
                 dbCursor.close()
                 dbConnection.close()
@@ -443,6 +505,7 @@ def setup():
         return False
 
     paths = getPaths()
+    ioSettings = jsonLoad(paths['io_settings']['path'])
 
     databaseSetup = setupDatabase(paths)
 

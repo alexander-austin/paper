@@ -12,6 +12,7 @@ __all__ = [
     'timestampString',
     'timestampToString',
     'setup',
+    'ApiClient',
     'Imager',
     'Database'
 ]
@@ -21,5 +22,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 from .common import getPaths, loggingInit, loggingGet, jsonLoad, jsonSave, timestampEpoch, timestampString, timestampToString, setup
+from ApiClient import ApiClient
 from .Imager import Imager
 from .Database import Database

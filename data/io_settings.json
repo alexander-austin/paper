@@ -1,4 +1,33 @@
 {
+    "state": {
+        "endpoints": {
+            "state": {
+                "get": {
+                    "method": "GET",
+                    "endpoint": "/api/<api_version>/hardware/state"
+                },
+                "update": {
+                    "method": "POST",
+                    "endpoint": "/api/<api_version>/hardware/state"
+                }
+            },
+            "event": {
+                "retention": 86400.0,
+                "get": {
+                    "method": "GET",
+                    "endpoint": "/api/<api_version>/hardware/event"
+                },
+                "add": {
+                    "method": "PUT",
+                    "endpoint": "/api/<api_version>/hardware/event"
+                },
+                "update": {
+                    "method": "POST",
+                    "endpoint": "/api/<api_version>/hardware/event"
+                }
+            }
+        }
+    },
     "display": {
         "size": {
             "landscape": {
@@ -607,8 +636,7 @@
                     "data": "turn_on"
                 }
             ]
-        },
-        "endpoints": {}
+        }
     },
     "mpu6050": {
         "bus": 1,
@@ -632,13 +660,7 @@
                 "z": 71
             }
         },
-        "smoothing": 10,
-        "endpoints": {
-            "poll": {
-                "method": "POST",
-                "endpoint": "/api/<api_version>/hardware/orientation"
-            }
-        }
+        "smoothing": 10
     },
     "gpinput": {
         "durations": {
@@ -654,8 +676,7 @@
                 "max": 6.0
             }
         },
-        "double": true,
-        "endpoints": {}
+        "double": true
     },
     "pins": {
         "01": {

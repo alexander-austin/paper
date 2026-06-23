@@ -14,19 +14,21 @@ class Mpu6050:
         self.state = 'initializing'
         self.values = {}
 
-        from utils import loggingGet, getPaths, jsonLoad
+        from utils import loggingGet, getPaths, jsonLoad, ApiClient
         self.logger = loggingGet(str(self.__class__.__name__).lower())
 
         self.paths = getPaths()
 
         self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
 
+        self.apiClient = ApiClient(self.logger)
+
         if isinstance(self.ioSettings, str):
 
             self.state = 'error'
             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
             return
-        
+
         try:
 
             from smbus2 import SMBus
@@ -64,6 +66,11 @@ class Mpu6050:
         return
 
 
+    def run(self):
+        """Main loop."""
+
+
+        return
     def poll(self):
         """Poll (smoothed) values for accelerometer & gyro, then infer orientation."""
 

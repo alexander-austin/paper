@@ -2,28 +2,15 @@
 # -*- coding: utf-8 -*-
 
 
-import time, sys
+import time
+from HardwareBase import HardwareBase
 
-class Display:
+class Display(HardwareBase):
 
 
     def __init__(self):
         """Initialize."""
-
-        self.state = 'initializing'
-
-        from utils import loggingGet, getPaths, jsonLoad
-        self.logger = loggingGet(str(self.__class__.__name__).lower())
-
-        self.paths = getPaths()
-
-        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
-
-        if isinstance(self.ioSettings, str):
-
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
-            return
+        super(Display, self).__init__()
 
         try:
 
@@ -41,12 +28,17 @@ class Display:
 
         self._startup()
 
-        if not self.state == 'error': self.state = 'ready'
+
+        if not self.state['value']['state'] == 'error': self._setState('ready')
 
 
         return
 
+    def run(self):
+        """Main loop."""
 
+
+        return
     def displayBufferedBytes(self, bufferedBytes):
         """Displays image from buffered bytes."""
 
@@ -56,9 +48,8 @@ class Display:
         )
 
 
-        return self.state
-
-
+        return
+    
     def _startup(self):
         """Begin hardware connection."""
 
@@ -104,10 +95,8 @@ class Display:
 
         except Exception as e:
 
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
+            self._setState('error', error=e)
 
-        self.state = 'ready'
 
 
         return

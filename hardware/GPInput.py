@@ -3,6 +3,7 @@
 
 
 import sys
+from utils import timestampEpoch
 
 
 class GPInput:
@@ -13,7 +14,7 @@ class GPInput:
 
         self.state = 'initializing'
 
-        from utils import loggingGet, getPaths, jsonLoad
+        from utils import loggingGet, getPaths, jsonLoad, ApiClient
         self.logger = loggingGet(str(self.__class__.__name__).lower())
 
         if not isinstance(gpio, int):
@@ -27,12 +28,14 @@ class GPInput:
             self.state = 'error'
             self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio', self.ioSettings]))
             return
-        
+
         self.gpio = gpio
 
         self.paths = getPaths()
 
         self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
+
+        self.apiClient = ApiClient(self.logger)
 
         self.history = {
             'poll': 0.0,
@@ -85,10 +88,13 @@ class GPInput:
         return
 
 
+    def run(self):
+        """Main loop."""
+
+
+        return
     def poll(self):
         """Poll gpio value."""
-
-        from utils import timestampEpoch
 
         # Poll raw value
         inputValue = self.GPIO.input(self.gpio)
@@ -141,8 +147,6 @@ class GPInput:
         return
     def _handleEvent(self):
         """Check for events and handle."""
-
-        from utils import timestampEpoch
 
         def shouldRetain(valueTimestamp, currentTimestamp):
 

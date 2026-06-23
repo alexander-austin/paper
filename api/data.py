@@ -39,7 +39,7 @@ def media(apiVersion, metaPath, subPath):
 
                 if metaPath == 'playlist' and subPath == 'new':
 
-                    pass
+                    pass # TODO:
 
                 elif metaPath == 'media' and subPath == 'new':
 
@@ -51,7 +51,7 @@ def media(apiVersion, metaPath, subPath):
 
                 if metaPath == 'playlist' and len(subPath) > 0:
 
-                    pass
+                    pass # TODO:
 
                 elif metaPath == 'media' and  '.' in subPath and not '/' in subPath:
 
@@ -71,7 +71,7 @@ def media(apiVersion, metaPath, subPath):
 
                 if metaPath == 'playlist' and len(subPath) > 0:
 
-                    pass
+                    pass # TODO:
 
                 elif metaPath == 'media' and '.' in subPath and not '/' in subPath:
 
@@ -194,56 +194,55 @@ def uploadMediaFile__v1():
 
 
 
-@server.route('/api/<path:apiVersion>/hardware/<path:hardwarePath>', methods=['GET', 'POST'])
+@server.route('/api/<path:apiVersion>/hardware/<path:hardwarePath>', methods=['GET', 'PUT', 'POST'])
 def hardware(apiVersion, hardwarePath):
     """Hardware routing handler."""
 
     if apiVersion == 'v1':
 
-        if request.method == 'GET':
+        if len(hardwarePath) > 0:
 
-            if len(hardwarePath) > 0:
+            if hardwarePath == 'state':
 
-                pass
+                if request.method == 'GET':
 
-        elif request.method == 'POST':
+                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateGet(stateType='state')}), 200
 
-            if len(hardwarePath) > 0:
-
-                if hardwarePath.startswith('display'):
-
-                    if hardwarePath == 'display':
-
-                        requestData = request.json
-
-                        if isinstance(requestData, dict):
-
-                            if 'file' in requestData.keys():
-
-                                if isinstance(requestData['file'], str) and len(requestData['file']) > 0:
-
-                                    return displayMediaFile__v1(requestData['file'])
-
-                    elif '/' in hardwarePath:
-
-                        if len(hardwarePath.split('/')) == 2 and len(hardwarePath.split('/')[-1]) > 0:
-
-                            if hardwarePath.split('/')[-1] == 'next':
-
-                                pass
-
-                            elif hardwarePath.split('/')[-1] == 'back':
-
-                                pass
-
-                elif hardwarePath == 'orientation':
+                elif request.method == 'POST':
 
                     requestData = request.json
 
                     if isinstance(requestData, dict):
 
-                        # TODO: validation
-                        return orientationUpdate__v1(requestData)
+                        database.stateUpdate(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+
+            elif hardwarePath == 'event':
+
+                if request.method == 'GET':
+
+                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateGet(stateType='event')}), 200
+
+                elif request.method == 'PUT':
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        database.stateAdd(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+
+                elif request.method == 'POST':
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        database.stateUpdate(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
 
 
     return jsonify({'error': 'Bad Request', 'api_version': apiVersion}), 400
