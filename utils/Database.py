@@ -333,7 +333,7 @@ class Database:
 
         return
 
-    def stateGet(self, stateType='event', formatted=True):
+    def stateEventGet(self, stateType='event', formatted=True):
         """Get state from db."""
 
         state = self._stateGet(
@@ -346,7 +346,7 @@ class Database:
             state = '[%(values)s]' % {
                 'values': ', '.join(
                     [
-                        self._itemToJson('state', s)
+                        self._itemToJson('state_event', s)
                         for s in state
                     ]
                 )
@@ -354,28 +354,34 @@ class Database:
 
 
         return state
-    def stateAdd(self, state):
+    def stateEventAdd(self, state):
         """Add state to db."""
 
-        if self._validItem('state', state) == True:
+        if self._validItem('state_event', state) == True:
+
+            # TODO: additional checks
 
             self._stateAdd(state)
 
 
         return
-    def stateUpdate(self, state):
+    def stateEventUpdate(self, state):
         """Update state in db."""
 
-        if self._validItem('state', state) == True:
+        if self._validItem('state_event', state) == True:
+
+            # TODO: additional checks
 
             self._stateUpdate(state)
 
 
         return
-    def stateDelete(self, state):
+    def stateEventDelete(self, state):
         """Delete state from db."""
 
-        if self._validItem('state', state) == True:
+        if self._validItem('state_event', state) == True:
+
+            # TODO: additional checks
 
             self._stateDelete(state)
 
@@ -1064,7 +1070,7 @@ class Database:
         return
 
     # State
-    def _stateGet(self, onlyType=None, onlyPending=False):
+    def _stateEventGet(self, onlyType=None, onlyPending=False):
         """Get state from db."""
 
         def dbResultsToStates(results):
@@ -1136,7 +1142,7 @@ class Database:
 
 
         return []
-    def _stateToDbValues(self, state, updating=False):
+    def _stateEventToDbValues(self, state, updating=False):
         """State dict to db values tuple."""
 
         import json
@@ -1169,33 +1175,33 @@ class Database:
 
 
         return values
-    def _stateAdd(self, state):
+    def _stateEventAdd(self, state):
         """Add new state."""
 
         self._dbModify(
-            'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+            'INSERT INTO state_event (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
             values=[self._stateToDbValues(s, False) for s in state] if isinstance(state, list) else self._stateToDbValues(state, False),
             closeOnExit=True
         )
 
 
         return
-    def _stateUpdate(self, state):
+    def _stateEventUpdate(self, state):
         """Update existing state."""
 
         self._dbModify(
-            'UPDATE state SET value = ?, pending = ? WHERE timestamp = ? AND component = ? AND type = ?;',
+            'UPDATE state_event SET value = ?, pending = ? WHERE timestamp = ? AND component = ? AND type = ?;',
             values=[self._stateToDbValues(s, True) for s in state] if isinstance(state, list) else self._stateToDbValues(state, True),
             closeOnExit=True
         )
 
 
         return
-    def _stateDelete(self, state):
+    def _stateEventDelete(self, state):
         """Delete existing playlist."""
 
         self._dbModify(
-            'DELETE FROM state WHERE timestamp = ? AND component = ? AND type = ?;',
+            'DELETE FROM state_event WHERE timestamp = ? AND component = ? AND type = ?;',
             values=[tuple([s['timestamp'], s['component'], s['type']]) for s in state] if isinstance(state, list) else tuple([state['timestamp'], state['component'], state['type']]),
             closeOnExit=True
         )

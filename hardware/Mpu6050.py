@@ -2,32 +2,18 @@
 # -*- coding: utf-8 -*-
 
 
-import math, sys
+import math, time
+from HardwareBase import HardwareBase
 
 
-class Mpu6050:
+class Mpu6050(HardwareBase):
 
 
     def __init__(self):
         """Initialize."""
+        super(Mpu6050, self).__init__()
 
-        self.state = 'initializing'
         self.values = {}
-
-        from utils import loggingGet, getPaths, jsonLoad, ApiClient
-        self.logger = loggingGet(str(self.__class__.__name__).lower())
-
-        self.paths = getPaths()
-
-        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
-
-        self.apiClient = ApiClient(self.logger)
-
-        if isinstance(self.ioSettings, str):
-
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
-            return
 
         try:
 
@@ -60,7 +46,9 @@ class Mpu6050:
             1
         )
 
-        if not self.state == 'error': self.state = 'ready'
+        if not self.state['value']['state'] == 'error': self._setState('ready')
+
+        self.run()
 
 
         return
@@ -69,16 +57,20 @@ class Mpu6050:
     def run(self):
         """Main loop."""
 
+        while True:
 
-        return
+            self.poll()
+
+            time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['run_interval'])
+
+
     def poll(self):
         """Poll (smoothed) values for accelerometer & gyro, then infer orientation."""
 
         values = {}
 
-        if not self.state == 'error':
+        if not self.state['value']['state'] == 'error':
 
-            self.state = 'polling'
             self.errorCount = 0
 
             for meterKey in ['accelerometer', 'gyro']:
@@ -114,15 +106,18 @@ class Mpu6050:
 
                 values['orientation']['orientation'] = 'portrait'
 
-            self.state = 'ready'
-
-        values['state'] = self.state
+        values['state'] = self.state['value']['state']
         values['error_count'] = self.errorCount
+
+        # Trigger event
+        if not values['orientation']['orientation'] == self.values['orientation']['orientation']:
+
+            self._addEvent({'event': 'orientation', 'value': values['orientation']['orientation']})
 
         self.values = values
 
 
-        return values
+        return
 
 
     def _read(self, register):
@@ -130,7 +125,7 @@ class Mpu6050:
 
         value = 0
 
-        if not self.state == 'error':
+        if not self.state['value']['state'] == 'error':
 
             try:
 
@@ -160,7 +155,7 @@ class Mpu6050:
                 value
             )
 
-        except: self.state = 'error'
+        except: self._setState('error', error='write')
 
 
         return

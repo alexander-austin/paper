@@ -15,7 +15,7 @@ def ping(apiVersion):
     return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
 
 
-@server.route('/api/<path:apiVersion>/metadata/<path:metaPath>/<path:subPath>', methods=['GET', 'PUT', 'POST', 'DELETE'])
+@server.route('/api/<path:apiVersion>/metadata/<path:metaPath>/<path:subPath>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def media(apiVersion, metaPath, subPath):
     """Media routing handler."""
 
@@ -33,7 +33,7 @@ def media(apiVersion, metaPath, subPath):
 
                     return downloadMediaFile__v1(subPath)
 
-        elif request.method == 'PUT':
+        elif request.method == 'POST':
 
             if len(subPath) > 0:
 
@@ -45,7 +45,7 @@ def media(apiVersion, metaPath, subPath):
 
                     return uploadMediaFile__v1(requestData)
 
-        elif request.method == 'POST':
+        elif request.method == 'PUT':
 
             if len(subPath) > 0:
 
@@ -194,7 +194,7 @@ def uploadMediaFile__v1():
 
 
 
-@server.route('/api/<path:apiVersion>/hardware/<path:hardwarePath>', methods=['GET', 'PUT', 'POST'])
+@server.route('/api/<path:apiVersion>/hardware/<path:hardwarePath>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def hardware(apiVersion, hardwarePath):
     """Hardware routing handler."""
 
@@ -206,23 +206,7 @@ def hardware(apiVersion, hardwarePath):
 
                 if request.method == 'GET':
 
-                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateGet(stateType='state')}), 200
-
-                elif request.method == 'POST':
-
-                    requestData = request.json
-
-                    if isinstance(requestData, dict):
-
-                        database.stateUpdate(requestData)
-
-                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
-
-            elif hardwarePath == 'event':
-
-                if request.method == 'GET':
-
-                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateGet(stateType='event')}), 200
+                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateEventGet(stateType='state')}), 200
 
                 elif request.method == 'PUT':
 
@@ -230,9 +214,15 @@ def hardware(apiVersion, hardwarePath):
 
                     if isinstance(requestData, dict):
 
-                        database.stateAdd(requestData)
+                        database.stateEventUpdate(requestData)
 
                         return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+
+            elif hardwarePath == 'event':
+
+                if request.method == 'GET':
+
+                    return jsonify({'status': 'ok', 'api_version': apiVersion, 'data': database.stateEventGet(stateType='event')}), 200
 
                 elif request.method == 'POST':
 
@@ -240,7 +230,27 @@ def hardware(apiVersion, hardwarePath):
 
                     if isinstance(requestData, dict):
 
-                        database.stateUpdate(requestData)
+                        database.stateEventAdd(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+
+                elif request.method == 'PUT':
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        database.stateEventUpdate(requestData)
+
+                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+
+                elif request.method == 'DELETE':
+
+                    requestData = request.json
+
+                    if isinstance(requestData, dict):
+
+                        database.stateEventDelete(requestData)
 
                         return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
 
@@ -249,6 +259,28 @@ def hardware(apiVersion, hardwarePath):
 
 
 # Hardware
+def hardwareEventManager__v1(requestData):
+    """Handle and process new incoming events."""
+
+    eventKeys = ['timestamp', 'component', 'type', 'value', 'pending']
+
+    # v1 hardcoding events
+    if isinstance(requestData, dict):
+
+        if all([eventKey in requestData.keys() for eventKey in eventKeys]) == True:
+
+            if requestData['type'] == 'event' and requestData['pending'] == True:
+
+                if requestData['component'] == 'mpu6050':
+
+                    pass
+
+                elif requestData['component'].startswith('gpinput_'):
+
+                    pass
+
+
+    return  jsonify({'error': 'Bad Request', 'api_version': 'v1'}), 400
 def displayMediaFile__v1(fileName):
     """Display media."""
 

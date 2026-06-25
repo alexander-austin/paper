@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-import time
+import os, sys, time
 from HardwareBase import HardwareBase
+from utils import Imager
 
 class Display(HardwareBase):
 
@@ -11,6 +12,10 @@ class Display(HardwareBase):
     def __init__(self):
         """Initialize."""
         super(Display, self).__init__()
+
+        self.orientation = 'landscape'
+        self.imager = Imager()
+        self.imager.setDisplayOrientation(self.orientation)
 
         try:
 
@@ -31,25 +36,79 @@ class Display(HardwareBase):
 
         if not self.state['value']['state'] == 'error': self._setState('ready')
 
+        self.run()
+
 
         return
 
     def run(self):
         """Main loop."""
 
+        while True:
+
+            events = self._getEvents()
+
+            for event in events:
+
+                pass
+
+                self.orientation
+
+            time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['run_interval'])
+
+
+    def displayFileName(self, fileName):
+        """Displays image from file name."""
+
+        self._displayFilePath(os.path.join(self.paths['media']['path'], fileName))
+
 
         return
-    def displayBufferedBytes(self, bufferedBytes):
+    def displayOrientationChange(self):
+        """Displays image from file name."""
+
+        if hasattr(self, 'currentFilePath'):
+
+            self._displayFilePath(self.currentFilePath)
+
+
+        return
+
+    def _displayFilePath(self, filePath):
+        """Displays image from file path."""
+
+        if os.path.exists(filePath):
+
+            try:
+
+                self.imager.setDisplayOrientation(self.orientation)
+                quantizedBuffer = self.imager.getQuantizedBuffer(filePath)
+
+                self._displayBufferedBytes(quantizedBuffer)
+
+                self.currentFilePath = filePath
+
+            except Exception as e:
+
+                self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), repr(e)]))
+
+
+        return
+    def _displayBufferedBytes(self, bufferedBytes):
         """Displays image from buffered bytes."""
 
-        self._runSequence(
-            self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['display'],
-            bufferedBytes
-        )
+        if isinstance(bufferedBytes, list):
+
+            if len(bufferedBytes) > 0:
+
+                self._runSequence(
+                    self.ioSettings[str(self.__class__.__name__).lower()]['sequences']['display'],
+                    bufferedBytes
+                )
 
 
         return
-    
+
     def _startup(self):
         """Begin hardware connection."""
 
@@ -95,7 +154,7 @@ class Display(HardwareBase):
 
         except Exception as e:
 
-            self._setState('error', error=e)
+            self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), repr(e)]))
 
 
 
@@ -103,19 +162,18 @@ class Display(HardwareBase):
     def _runSequence(self, sequence, var=None, isChild=False):
         """Run sequence of I/O operations."""
 
-        if self.state == 'error': return
+        if self.state['value']['state'] == 'error': return
 
-        if not self.state == 'working': self.state = 'working'
+        self._setState('working')
 
         if not isinstance(sequence, list):
 
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'bad sequence format', '']))
+            self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'bad sequence format', '']))
             return
         
         for item in sorted(sequence, key=lambda s: s['order']):
 
-            if not self.state == 'error':
+            if not self.state['value']['state'] == 'error':
 
                 try:
 
@@ -182,21 +240,20 @@ class Display(HardwareBase):
 
                 except Exception as e:
 
-                    self.state = 'error'
-                    self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
+                    self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
                     break
 
         if isChild == False:
 
-            if self.state == 'working': self.state = 'ready'
+            if not self.state['value']['state'] == 'error': self._setState('ready')
 
 
         return
     def _readWait(self):
         """Polls busy state. Ready = True. Timeout/error = False."""
 
-        if self.state == 'error': return False
-        self.state = 'waiting'
+        if self.state['value']['state'] == 'error': return False
+        self._setState('waiting')
 
         tries = 0
 
@@ -211,14 +268,13 @@ class Display(HardwareBase):
 
             except Exception as e:
 
-                self.state = 'error'
-                self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
+                self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
                 break
 
             tries += 1
             time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['busy_wait'] / 1000.0)
 
-        self.state = 'ready'
+        if not self.state['value']['state'] == 'error': self._setState('ready')
 
 
         return False
@@ -235,3 +291,8 @@ class Display(HardwareBase):
 
 
         return
+    def _getEventMethodAndArgs(self):
+        """."""
+
+
+        return None, None

@@ -364,6 +364,8 @@ def timestampToString(epochTimestamp):
     from datetime import datetime, timezone
     if not isinstance(epochTimestamp, int) and not isinstance(epochTimestamp, float): return ''
     return str(datetime.fromtimestamp(epochTimestamp, tz=timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f'))[0:-3]
+def timestampDelta(pastTimestamp):
+    return timestampEpoch() - pastTimestamp
 
 # First run setup
 def setup():
@@ -421,7 +423,7 @@ def setup():
 
                 dbCursor.execute(
                     """
-                    CREATE TABLE state (
+                    CREATE TABLE state_event (
                         timestamp REAL    NOT NULL ON CONFLICT ROLLBACK,
                         component TEXT    NOT NULL ON CONFLICT ROLLBACK,
                         type      TEXT    NOT NULL ON CONFLICT ROLLBACK CHECK (type = 'event' OR type = 'state'),
@@ -432,43 +434,42 @@ def setup():
                 )
                 dbConnection.commit()
 
-                dbCursor.execute(
-                    'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
-                    (
-                        timestampEpoch(),
-                        'display',
-                        'state',
-                        '{"state": "offline"}',
-                        0
-                    )
-                )
-                dbCursor.execute(
-                    'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
-                    (
-                        timestampEpoch(),
-                        'mpu6050',
-                        'state',
-                        '{"state": "offline"}',
-                        0
-                    )
-                )
+                for componentKey in ioSettings.keys():
 
-                for pin in ioSettings['pins']:
+                    if 'run_interval' in ioSettings[componentKey].keys():
 
-                    if pin['owner'] == 'gpinput' and pin['active'] == True:
+                        if ioSettings[componentKey]['pin_owner'] == True:
 
-                        dbCursor.execute(
-                            'INSERT INTO state (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
-                            (
-                                timestampEpoch(),
-                                'gpio_%(gpio)s' % {
-                                    'gpio': str('00%d' % (pin['gpio'], ))[-2:]
-                                },
-                                'state',
-                                '{"state": "offline"}',
-                                0
+                            for pin in ioSettings['pins']:
+
+                                if pin['owner'] == componentKey and pin['active'] == True:
+
+                                    dbCursor.execute(
+                                        'INSERT INTO state_event (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+                                        (
+                                            timestampEpoch(),
+                                            '%(component_key)s_%(gpio)s' % {
+                                                'component_key': componentKey,
+                                                'gpio': str('00%d' % (pin['gpio'], ))[-2:]
+                                            },
+                                            'state',
+                                            '{"state": "offline"}',
+                                            0
+                                        )
+                                    )
+
+                        else:
+
+                            dbCursor.execute(
+                                'INSERT INTO state_event (timestamp, component, type, value, pending) VALUES (?, ?, ?, ?, ?);',
+                                (
+                                    timestampEpoch(),
+                                    componentKey,
+                                    'state',
+                                    '{"state": "offline"}',
+                                    0
+                                )
                             )
-                        )
 
                 dbConnection.commit()
 
@@ -485,7 +486,7 @@ def setup():
                 dbCursor = dbConnection.cursor()
 
                 dbCursor.execute(
-                    'UPDATE state SET value = ?, pending = ? WHERE type = ?;',
+                    'UPDATE state_event SET value = ?, pending = ? WHERE type = ?;',
                     (
                         '{"state": "offline"}',
                         0,

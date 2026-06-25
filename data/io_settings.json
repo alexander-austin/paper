@@ -1,5 +1,5 @@
 {
-    "state": {
+    "state_event": {
         "endpoints": {
             "state": {
                 "get": {
@@ -29,6 +29,8 @@
         }
     },
     "display": {
+        "run_interval": 1.0,
+        "pin_owner": false,
         "size": {
             "landscape": {
                 "width": 800,
@@ -639,6 +641,8 @@
         }
     },
     "mpu6050": {
+        "run_interval": 0.5,
+        "pin_owner": false,
         "bus": 1,
         "address": 104,
         "registers": {
@@ -663,6 +667,8 @@
         "smoothing": 10
     },
     "gpinput": {
+        "run_interval": 0.1,
+        "pin_owner": true,
         "durations": {
             "poll": 0.1,
             "history": 30.0,

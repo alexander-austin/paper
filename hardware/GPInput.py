@@ -2,52 +2,40 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
+import sys, time
 from utils import timestampEpoch
+from HardwareBase import HardwareBase
 
 
-class GPInput:
+class GPInput(HardwareBase):
 
 
     def __init__(self, gpio=-1):
         """Initialize."""
+        super(HardwareBase, self).__init__()
 
-        self.state = 'initializing'
-
-        from utils import loggingGet, getPaths, jsonLoad, ApiClient
-        self.logger = loggingGet(str(self.__class__.__name__).lower())
+        self.source = '%(component_key)s_%(gpio)s' % {
+            'component_key': str(self.__class__.__name__).lower(),
+            'gpio': str('00%d' % (pin['gpio'], ))[-2:]
+        }
 
         if not isinstance(gpio, int):
 
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio', self.ioSettings]))
+            self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio']))
             return
 
         if gpio == -1:
 
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio', self.ioSettings]))
+            self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio']))
             return
 
         self.gpio = gpio
-
-        self.paths = getPaths()
-
-        self.ioSettings = jsonLoad(self.paths['io_settings']['path'], self.logger)
-
-        self.apiClient = ApiClient(self.logger)
 
         self.history = {
             'poll': 0.0,
             'trigger': 0.0,
             'values': []
         }
-
-        if isinstance(self.ioSettings, str):
-
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'error loading io_settings', self.ioSettings]))
-            return
 
         try:
 
@@ -79,10 +67,11 @@ class GPInput:
 
         except Exception as e:
 
-            self.state = 'error'
-            self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'Exception', repr(e)]))
+            self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), repr(e)]))
 
-        if not self.state == 'error': self.state = 'ready'
+        if not self.state['value']['state'] == 'error': self._setState('ready')
+
+        self.run()
 
 
         return
@@ -91,8 +80,13 @@ class GPInput:
     def run(self):
         """Main loop."""
 
+        while True:
 
-        return
+            self.poll()
+
+            time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['run_interval'])
+
+
     def poll(self):
         """Poll gpio value."""
 
@@ -229,13 +223,13 @@ class GPInput:
 
                                                     if withinGap(min(sortedValues[v]['timestamp'], sortedValues[v + 1]['timestamp']), max(sortedValues[v + 2]['timestamp'], sortedValues[v + 3]['timestamp'])):
 
-                                                        # TODO: trigger double short
+                                                        self._addEvent({'event': 'short_double'})
                                                         triggered = True
                                                         self.history['trigger'] = timestampEpoch()
 
                                         if triggered == False:
 
-                                            # TODO: trigger single short
+                                            self._addEvent({'event': 'short'})
                                             triggered = True
                                             self.history['trigger'] = timestampEpoch()
 
@@ -250,13 +244,13 @@ class GPInput:
 
                                                     if withinGap(min(sortedValues[v]['timestamp'], sortedValues[v + 1]['timestamp']), max(sortedValues[v + 2]['timestamp'], sortedValues[v + 3]['timestamp'])):
 
-                                                        # TODO: trigger double long
+                                                        self._addEvent({'event': 'long_double'})
                                                         triggered = True
                                                         self.history['trigger'] = timestampEpoch()
 
                                         if triggered == False:
 
-                                            # TODO: trigger single long
+                                            self._addEvent({'event': 'long'})
                                             triggered = True
                                             self.history['trigger'] = timestampEpoch()
 
