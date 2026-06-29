@@ -201,7 +201,7 @@ class Database:
                 'extra': []
             }
         },
-        'state': {
+        'state_event': {
             'allow_extra_keys': True,
             'timestamp': {
                 'required': True,
@@ -223,9 +223,9 @@ class Database:
             },
             'value': {
                 'required': True,
-                'types': ['str'],
+                'types': ['dict'],
                 'json_include': True,
-                'extra': ['stringLengthGreaterThanZero']
+                'extra': []
             },
             'pending': {
                 'required': True,
@@ -304,6 +304,15 @@ class Database:
             if isinstance(existingMedia, bool) and existingMedia == False:
 
                 self._mediaAdd(media)
+
+                if 'thumbnails' in media.keys():
+
+                    for thumbnail in media['thumbnails']:
+
+                        thumbnail['type'] = 'thumbnail'
+                        thumbnail['parent'] = media['file']
+
+                        self._mediaAdd(thumbnail)
 
 
         return
@@ -1388,211 +1397,6 @@ class Database:
         return
 
     # Validation
-    def _itemToJson(self, itemType, item):
-        """Item to JSON."""
-
-        def valueToJsonKV(key, value, required, validTypes):
-
-            if value is None:
-
-                if required == True:
-
-                    return '"%(key)s": null' % {
-                        'key': key
-                    }
-
-            else:
-
-                if isinstance(value, str):
-
-                    if 'str' in validTypes:
-
-                        return '"%(key)s": "%(value)s"' % {
-                            'key': key,
-                            'value': value
-                        }
-
-                elif isinstance(value, bool):
-
-                    if 'bool' in validTypes:
-
-                        return '"%(key)s": %(value)s' % {
-                            'key': key,
-                            'value': 'trus' if value == True else 'false'
-                        }
-
-                elif isinstance(value, int):
-
-                    if 'int' in validTypes:
-
-                        return '"%(key)s": %(value)d' % {
-                            'key': key,
-                            'value': value
-                        }
-
-                elif isinstance(value, float):
-
-                    if 'float' in validTypes:
-
-                        return '"%(key)s": %(value)f' % {
-                            'key': key,
-                            'value': value
-                        }
-
-                elif isinstance(value, list):
-
-                    if len(value) > 0:
-
-                        if all([isinstance(v, str) for v in value]) == True:
-
-                            if 'str_list' in validTypes:
-
-                                return '"%(key)s": [%(values)s]' % {
-                                    'key': key,
-                                    'values': ', '.join(
-                                        [
-                                            '"%s"' % (v, )
-                                            for v in value
-                                        ]
-                                    )
-                                }
-
-                        elif all([isinstance(v, bool) for v in value]) == True:
-
-                            if 'bool_list' in validTypes:
-
-                                return '"%(key)s": [%(values)s]' % {
-                                    'key': key,
-                                    'values': ', '.join(
-                                        [
-                                            'true' if v == True else 'false'
-                                            for v in value
-                                        ]
-                                    )
-                                }
-
-                        elif all([isinstance(v, int) for v in value]) == True:
-
-                            if 'int_list' in validTypes:
-
-                                return '"%(key)s": [%(values)s]' % {
-                                    'key': key,
-                                    'values': ', '.join(
-                                        [
-                                            '%d' % (v, )
-                                            for v in value
-                                        ]
-                                    )
-                                }
-
-                        elif all([isinstance(v, float) for v in value]) == True:
-
-                            if 'float_list' in validTypes:
-
-                                return '"%(key)s": [%(values)s]' % {
-                                    'key': key,
-                                    'values': ', '.join(
-                                        [
-                                            '%f' % (v, )
-                                            for v in value
-                                        ]
-                                    )
-                                }
-
-                        elif all([isinstance(v, dict) for v in value]) == True:
-
-                            for validType in validTypes:
-
-                                if len(validType.split('_')) == 2:
-
-                                    if validType.split('_')[-1] == 'list' and validType.split('_')[0] in self.validation.keys():
-
-                                        if all([self._validItem(validType, v) == True for v in value]) == True:
-
-                                            return '"%(key)s": [%(values)s]' % {
-                                                'key': key,
-                                                'values': ', '.join(
-                                                    [
-                                                        self._itemToJson(validType, v)
-                                                        for v in value
-                                                    ]
-                                                )
-                                            }
-
-                    else:
-
-                        if required == True:
-
-                            return '"%(key)s": []' % {
-                                'key': key
-                            }
-
-                elif isinstance(value, dict):
-
-                    for validType in validTypes:
-
-                        if validType in self.validation.keys():
-
-                            if self._validItem(validType, value) == True:
-
-                                return '"%(key)s": %(value)s' % {
-                                    'key': key,
-                                    'value': self._itemToJson(validType, value)
-                                }
-
-
-            return None
-
-        if not isinstance(item, dict):
-
-            if isinstance(item, list):
-
-                return '[%(items)s]' % {
-                    'items': ', '.join(
-                        [
-                            self._itemToJson(itemType, i)
-                            for i in item
-                        ]
-                    )
-                }
-
-            else:
-
-                return False
-
-        if len(item.keys()) == 0:
-
-            return False
-
-        if itemType in self.validation.keys():
-
-            kvPairs = []
-
-            for validationKey in self.validation[itemType].keys():
-
-                if isinstance(self.validation[itemType][validationKey], dict):
-
-                    if validationKey in item.keys() and self.validation[itemType][validationKey]['json_include'] == True:
-
-                        kv = valueToJsonKV(
-                            validationKey,
-                            item[validationKey],
-                            self.validation[itemType][validationKey]['required'],
-                            self.validation[itemType][validationKey]['types']
-                        )
-
-                        if not kv is None:
-
-                            kvPairs.append(kv)
-
-            if len(kvPairs) > 0:
-
-                return '{%(kv_pairs)s}' % {
-                    'kv_pairs': ', '.join(kvPairs)
-                }
-
-
-        return ''
     def _itemToFormatted(self, itemType, item):
         """Item to JSON."""
 
@@ -1648,7 +1452,34 @@ class Database:
 
                             for validType in self.validation[itemType][validationKey]['types']:
 
-                                if validType == 'str':
+                                if validType == 'dict':
+
+                                    typeValidations.append(isinstance(item[validationKey], dict))
+
+                                elif validType == 'dict_list':
+
+                                    if isinstance(item[validationKey], list):
+
+                                        if len(item[validationKey]) > 0:
+
+                                            typeValidations.append(
+                                                all(
+                                                    [
+                                                        isinstance(child, dict)
+                                                        for child in item[validationKey]
+                                                    ]
+                                                ) == True
+                                            )
+
+                                        else:
+
+                                            typeValidations.append(True)
+
+                                    else:
+
+                                        typeValidations.append(False)
+
+                                elif validType == 'str':
 
                                     typeValidations.append(isinstance(item[validationKey], str))
 

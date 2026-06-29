@@ -3,7 +3,7 @@
 
 
 import os
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 import pillow_avif
 from pillow_heif import register_heif_opener
 
@@ -118,6 +118,88 @@ class Imager:
 
 
         return
+    def generateDefault(self):
+        """Set display orientation."""
+
+        defaultPath = os.path.join(
+            self.paths['media']['path'],
+            'default.jpg'
+        )
+
+        displaySize = sorted(self._displaySize())
+
+        colorBoxSize = [
+            displaySize[0],
+            int(displaySize[1] / len(self.ioSettings['display']['palette']))
+        ]
+
+        colorTextBoxMargin = [
+            int(displaySize[0] * 0.1),
+            int((displaySize[1] / len(self.ioSettings['display']['palette'])) * 0.1)
+        ]
+
+        colorTextBoxSize = [
+            int(colorBoxSize[0] - (2 * colorTextBoxMargin[0])),
+            int(colorBoxSize[1] - (2 * colorTextBoxMargin[1]))
+        ]
+
+        pilImage = Image.new(
+            mode='RGB',
+            size=tuple(displaySize),
+            color=tuple(self._fillColor())
+        )
+
+        pilImageDraw = ImageDraw.Draw(pilImage)
+
+        pilImageFont = self._fontFit(
+            self.paths['font_mono_bold']['path'],
+            [paletteColor['name'] for paletteColor in self.ioSettings['display']['palette']],
+            maxWidth=colorTextBoxSize[0],
+            maxHeight=colorTextBoxSize[1]
+        )
+
+        for p in range(len(self.ioSettings['display']['palette'])):
+
+            pilImageDraw.rectangle(
+                (
+                    0,
+                    int(colorBoxSize[1] * p),
+                    colorBoxSize[0],
+                    int(colorBoxSize[1] * (p + 1))
+                ),
+                (
+                    self.ioSettings['display']['palette'][p]['r'],
+                    self.ioSettings['display']['palette'][p]['g'],
+                    self.ioSettings['display']['palette'][p]['b']
+                )
+            )
+
+            pilImageDraw.text(
+                tuple(
+                    self._textCenter(
+                        (
+                            colorTextBoxMargin[0],
+                            int((colorBoxSize[1] * p) + colorTextBoxMargin[1]),
+                            colorTextBoxMargin[0] + colorTextBoxSize[0],
+                            int((colorBoxSize[1] * p) + colorTextBoxMargin[1] + colorTextBoxSize[1])
+                        ),
+                        self.ioSettings['display']['palette'][p]['name'],
+                        pilImageFont
+                    )
+                ),
+                self.ioSettings['display']['palette'][p]['name'],
+                font=pilImageFont,
+                fill=tuple(self._foreColor())
+            )
+
+        pilImage.save(defaultPath)
+
+        defaultImageInfo = self.getImageInfo(defaultPath)
+
+        defaultImageInfo['thumbnails'] = self.generateThumbnails(defaultPath)
+
+
+        return defaultImageInfo
 
 
     def _generateThumbnail(self, imagePath, thumbnailPath, size):
@@ -331,7 +413,48 @@ class Imager:
 
         return pastedImage
    
+    def _fontFit(self, fontPath, testText='test text', maxWidth=100, maxHeight=100):
+        """Gets largest font size to fill given width/height with test text."""
 
+        pilImageFont = ImageFont.truetype(fontPath, 12)
+
+        if isinstance(testText, str): testText = [testText]
+
+        for fontSize in range(100, 2, -0.5):
+
+            tempFont = ImageFont.truetype(fontPath, fontSize)
+
+            fits = []
+
+            for tt in testText:
+
+                l, t, r, b = tempFont.getbbox(tt)
+
+                if (r - l) <= maxWidth and (b - t) <= maxHeight:
+
+                    fits.append(True)
+
+                else:
+
+                    fits.append(False)
+
+            if all(fits) == True:
+
+                pilImageFont = tempFont
+                break
+
+
+        return pilImageFont
+    def _textCenter(self, rectangleCoordinates, text, pilImageFont):
+        """Gets x, y coordinate to center text within rectangle."""
+
+        l, t, r, b = pilImageFont.getbbox(text)
+
+        x = int(((rectangleCoordinates[2] - rectangleCoordinates[0]) - (r - l)) / 2)
+        y = int(((rectangleCoordinates[3] - rectangleCoordinates[1]) - (b - t)) / 2)
+
+
+        return [x, y]
     def _generatePalette(self):
         """Generate quantization palette."""
 
@@ -371,6 +494,21 @@ class Imager:
 
 
         return [255, 255, 255]
+    def _foreColor(self):
+        """Get fore color."""
+
+        for paletteColor in self.ioSettings['display']['palette']:
+
+            if paletteColor['fore'] == True:
+
+                return [
+                    paletteColor['r'],
+                    paletteColor['g'],
+                    paletteColor['b']
+                ]
+
+
+        return [0, 0, 0]
     def _displaySize(self):
         """Get display size."""
 

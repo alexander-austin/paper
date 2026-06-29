@@ -46,6 +46,7 @@
                 "id": 0,
                 "name": "black",
                 "fill": false,
+                "fore": true,
                 "r": 0,
                 "g": 0,
                 "b": 0
@@ -54,6 +55,7 @@
                 "id": 1,
                 "name": "white",
                 "fill": true,
+                "fore": false,
                 "r": 255,
                 "g": 255,
                 "b": 255
@@ -62,6 +64,7 @@
                 "id": 2,
                 "name": "green",
                 "fill": false,
+                "fore": false,
                 "r": 0,
                 "g": 255,
                 "b": 0
@@ -70,6 +73,7 @@
                 "id": 3,
                 "name": "blue",
                 "fill": false,
+                "fore": false,
                 "r": 0,
                 "g": 0,
                 "b": 255
@@ -78,6 +82,7 @@
                 "id": 4,
                 "name": "red",
                 "fill": false,
+                "fore": false,
                 "r": 255,
                 "g": 0,
                 "b": 0
@@ -86,6 +91,7 @@
                 "id": 5,
                 "name": "yellow",
                 "fill": false,
+                "fore": false,
                 "r": 255,
                 "g": 255,
                 "b": 0
@@ -94,6 +100,7 @@
                 "id": 6,
                 "name": "orange",
                 "fill": false,
+                "fore": false,
                 "r": 255,
                 "g": 128,
                 "b": 0

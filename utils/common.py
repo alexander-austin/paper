@@ -222,6 +222,21 @@ def getPaths():
                 'data',
                 'mpu6050.log'
             )
+        },
+        'font_mono_bold': {
+            'type': 'font',
+            'publish': False,
+            'path': os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.realpath(__file__)
+                    )
+                ),
+                'web',
+                'static',
+                'fonts',
+                'SplineSansMono-Bold.ttf'
+            )
         }
     }
 
@@ -476,6 +491,30 @@ def setup():
                 dbCursor.close()
                 dbConnection.close()
 
+                from Database import Database
+                from Imager import Imager
+
+                database = Database()
+                imager = Imager()
+
+                defaultImage = imager.generateDefault()
+
+                database.metadataMediaAdd(defaultImage)
+                database.metadataPlaylistAdd(
+                    {
+                        'active': True,
+                        'name': 'all',
+                        'interval': 30.0,
+                        'mode': 'shuffle',
+                        'sorts': [],
+                        'filters': [],
+                        'index': 0,
+                        'files': [
+                            defaultImage['file']
+                        ]
+                    }
+                )
+
             # Check database
             else:
 
@@ -491,6 +530,14 @@ def setup():
                         '{"state": "offline"}',
                         0,
                         'component'
+                    )
+                )
+
+                dbCursor.execute(
+                    'UPDATE state_event SET pending = ? WHERE type = ?;',
+                    (
+                        0,
+                        'event'
                     )
                 )
 
