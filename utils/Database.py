@@ -256,12 +256,13 @@ class Database:
 
         if formatted == True:
 
-            metadata = self._itemToJson(metadata)
+            metadata = self._itemToFormatted('metadata', metadata)
 
 
         return metadata
+
     def metadataMediaFileExists(self, fileName):
-        """Check if file exists on disk or in DB."""
+        """Check if file exists on disk or in db."""
 
         import os
 
@@ -313,7 +314,7 @@ class Database:
 
             existingMedia = self.metadataFileExists(media['file'])
 
-            if isinstance(existingMedia, bool) and existingMedia == False:
+            if isinstance(existingMedia, dict):
 
                 self._mediaUpdate(media)
 
@@ -326,9 +327,157 @@ class Database:
 
             existingMedia = self.metadataFileExists(media['file'])
 
-            if isinstance(existingMedia, bool) and existingMedia == False:
+            if isinstance(existingMedia, dict):
 
                 self._mediaDelete(media)
+
+
+        return
+
+    def metadataPlaylistExists(self, playlist):
+        """Check if playlist exists in db."""
+
+        existingPlaylists = self._playlistGet()
+
+        if isinstance(existingPlaylists, list):
+
+            for p in range(len(existingPlaylists)):
+
+                if existingPlaylists[p]['name'] == playlist['name']:
+
+                    return existingPlaylists[p]
+
+
+        return False
+    def metadataPlaylistAdd(self, playlist):
+        """Add playlist to db."""
+
+        if self._validItem('playlist', playlist) == True:
+
+            existingPlaylist = self.metadataPlaylistExists(playlist)
+
+            if isinstance(existingPlaylist, bool) and existingPlaylist == False:
+
+                self._playlistAdd(playlist)
+
+                self._playlistsPopulate()
+
+
+        return
+    def metadataPlaylistUpdate(self, playlist):
+        """Update playlist in db."""
+
+        if self._validItem('playlist', playlist) == True:
+
+            existingPlaylist = self.metadataPlaylistExists(playlist)
+
+            if isinstance(existingPlaylist, dict):
+
+                self._playlistUpdate(playlist)
+
+                self._playlistsPopulate()
+
+
+        return
+    def metadataPlaylistDelete(self, playlist):
+        """Delete playlist from db."""
+
+        if self._validItem('playlist', playlist) == True:
+
+            existingPlaylist = self.metadataPlaylistExists(playlist)
+
+            if isinstance(existingPlaylist, dict):
+
+                self._playlistDelete(playlist)
+
+
+        return
+
+    def metadataPlaylistCurrentGet(self):
+        """Get current playlist."""
+
+        playlists = self._playlistGet()
+
+        if isinstance(playlists, list):
+
+            for p in range(len(playlists)):
+
+                if playlists[p]['active'] == True:
+
+                    return playlists[p]
+
+
+        return
+    def metadataPlaylistMediaCurrentGet(self):
+        """Get current media."""
+
+        currentPlaylist = self.metadataPlaylistCurrent()
+
+        if isinstance(currentPlaylist, dict) and len(currentPlaylist['files']) > 0:
+
+            media = self._mediaGet()
+
+            if isinstance(media, list):
+
+                for m in range(len(media)):
+
+                    if media[m]['file'] == currentPlaylist['files'][currentPlaylist['index']]:
+
+                        return media[m]
+
+
+        return
+    def metadataPlaylistMediaNextGet(self, update=True):
+        """Get next media."""
+
+        currentPlaylist = self.metadataPlaylistCurrent()
+
+        if isinstance(currentPlaylist, dict) and len(currentPlaylist['files']) > 0:
+
+            nextIndex = int(currentPlaylist['index'] + 1) if len(currentPlaylist['files']) < int(currentPlaylist['index'] + 1) else 0
+
+            media = self._mediaGet()
+
+            if isinstance(media, list):
+
+                for m in range(len(media)):
+
+                    if media[m]['file'] == currentPlaylist['files'][nextIndex]:
+
+                        if update == True:
+
+                            currentPlaylist['index'] = nextIndex
+
+                            self._playlistUpdate(currentPlaylist)
+
+                        return media[m]
+
+
+        return
+    def metadataPlaylistMediaBackGet(self, update=True):
+        """Get previous media."""
+
+        currentPlaylist = self.metadataPlaylistCurrent()
+
+        if isinstance(currentPlaylist, dict) and len(currentPlaylist['files']) > 0:
+
+            backIndex = int(currentPlaylist['index'] - 1) if int(currentPlaylist['index'] - 1) >= 0 else int(len(currentPlaylist['files']) - 1)
+
+            media = self._mediaGet()
+
+            if isinstance(media, list):
+
+                for m in range(len(media)):
+
+                    if media[m]['file'] == currentPlaylist['files'][backIndex]:
+
+                        if update == True:
+
+                            currentPlaylist['index'] = backIndex
+
+                            self._playlistUpdate(currentPlaylist)
+
+                        return media[m]
 
 
         return
@@ -387,6 +536,7 @@ class Database:
 
 
         return
+
 
     # Database queries
     def _dbGet(self, query, values=None, parentConnection=None, parentCursor=None, closeOnExit=True):
@@ -713,6 +863,8 @@ class Database:
             closeOnExit=True
         )
 
+        self._playlistsPopulate()
+
 
         return
     def _mediaUpdate(self, media):
@@ -723,6 +875,8 @@ class Database:
             values=[self._mediaToDbValues(m, True) for m in media] if isinstance(media, list) else self._mediaToDbValues(media, True),
             closeOnExit=True
         )
+
+        self._playlistsPopulate()
 
 
         return
@@ -756,6 +910,8 @@ class Database:
             values=[tuple([m['file'], m['file']]) for m in media] if isinstance(media, list) else tuple([media['file'], media['file']]),
             closeOnExit=True
         )
+
+        self._playlistsPopulate()
 
 
         return
@@ -875,7 +1031,7 @@ class Database:
 
         if save == True:
 
-            self._playlistAdd(playlist)
+            self._playlistUpdate(playlist)
 
 
         return playlist
@@ -1007,6 +1163,14 @@ class Database:
     def _playlistAdd(self, playlist):
         """Add new playlist."""
 
+        if (isinstance(playlist, list) and any([p['active'] for p in playlist]) == True) or playlist['active'] == True:
+
+            self._dbModify(
+                'UPDATE playlist SET active = ?;',
+                values=(0,),
+                closeOnExit=True
+            )
+
         self._dbModify(
             'INSERT INTO playlist (active, name, interval, mode, filters, sorts, [index], files) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
             values=[self._playlistToDbValues(p, False) for p in playlist] if isinstance(playlist, list) else self._playlistToDbValues(playlist, False),
@@ -1017,6 +1181,20 @@ class Database:
         return
     def _playlistUpdate(self, playlist):
         """Update existing playlist."""
+
+        existingPlaylist = self._playlistGet(playlist)
+
+        if existingPlaylist is None or (isinstance(existingPlaylist, list) and len(existingPlaylist) == 0):
+
+            return self._playlistAdd(playlist)
+
+        if (isinstance(playlist, list) and any([p['active'] for p in playlist]) == True) or playlist['active'] == True:
+
+            self._dbModify(
+                'UPDATE playlist SET active = ?;',
+                values=(0,),
+                closeOnExit=True
+            )
 
         self._dbModify(
             'UPDATE playlist SET active = ?, interval = ?, mode = ?, filters = ?, sorts = ?, [index] = ?, files = ? WHERE name = ?;',
@@ -1415,6 +1593,25 @@ class Database:
 
 
         return ''
+    def _itemToFormatted(self, itemType, item):
+        """Item to JSON."""
+
+        if isinstance(item, list): return [self._itemToFormatted(itemType, i) for i in item]
+
+        formattedItem = {}
+
+        if itemType in self.validation.keys():
+
+            for validationKey in self.validation[itemType].keys():
+
+                if isinstance(self.validation[itemType][validationKey], dict):
+
+                    if validationKey in item.keys() and self.validation[itemType][validationKey]['json_include'] == True:
+
+                        formattedItem[validationKey] = item[validationKey]
+
+
+        return formattedItem
     def _validItem(self, itemType, item):
         """Validate an item."""
 

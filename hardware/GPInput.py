@@ -10,26 +10,24 @@ from HardwareBase import HardwareBase
 class GPInput(HardwareBase):
 
 
-    def __init__(self, gpio=-1):
+    def __init__(self, *args, **kwargs):
         """Initialize."""
-        super(HardwareBase, self).__init__()
+        super(HardwareBase, self).__init__(*args, **kwargs)
 
         self.source = '%(component_key)s_%(gpio)s' % {
             'component_key': str(self.__class__.__name__).lower(),
             'gpio': str('00%d' % (pin['gpio'], ))[-2:]
         }
 
-        if not isinstance(gpio, int):
+        if not isinstance(self.gpio, int):
 
             self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio']))
             return
 
-        if gpio == -1:
+        if self.gpio == -1:
 
             self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), 'invalid gpio']))
             return
-
-        self.gpio = gpio
 
         self.history = {
             'poll': 0.0,
@@ -70,8 +68,6 @@ class GPInput(HardwareBase):
             self._setState('error', error=' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), repr(e)]))
 
         if not self.state['value']['state'] == 'error': self._setState('ready')
-
-        self.run()
 
 
         return

@@ -9,8 +9,11 @@ from utils import timestampEpoch
 class HardwareBase:
 
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize."""
+
+        self.args = list(args)
+        for key, value in kwargs.items(): setattr(self, key, value)
 
         self.source = str(self.__class__.__name__).lower()
 
@@ -28,7 +31,7 @@ class HardwareBase:
 
         return
 
-    def _setState(self, status, values={}, error=None):
+    def _setState(self, status, values={}, error=None, sendToApi=True):
         """Set component state."""
 
         self.state = {
@@ -56,17 +59,19 @@ class HardwareBase:
 
                 self.logger.error(' '.join([str(self.__class__.__name__), str(sys._getframe().f_code.co_name), repr(error)]))
 
-        apiRequest = threading.Thread(
-            target=self.apiClient.sendRequest,
-            kwargs={
-                'method': self.ioSettings['state_event']['endpoints']['state']['update']['method'],
-                'endpoint': self.ioSettings['state_event']['endpoints']['state']['update']['endpoint'],
-                'timeout': 3.0,
-                'requestData': self.state
-            },
-            daemon=False
-        )
-        apiRequest.start()
+        if sendToApi == True:
+
+            apiRequest = threading.Thread(
+                target=self.apiClient.sendRequest,
+                kwargs={
+                    'method': self.ioSettings['state_event']['endpoints']['state']['update']['method'],
+                    'endpoint': self.ioSettings['state_event']['endpoints']['state']['update']['endpoint'],
+                    'timeout': 3.0,
+                    'requestData': self.state
+                },
+                daemon=False
+            )
+            apiRequest.start()
 
 
         return
@@ -109,6 +114,23 @@ class HardwareBase:
             ),
             'pending': True
         }
+
+        if self.ioSettings[str(self.__class__.__name__).lower()]['pin_owner'] == True:
+
+            for pinKey in self.ioSettings['pins']:
+
+                if self.ioSettings['pins'][pinKey]['owner'] == str(self.__class__.__name__).lower() and self.ioSettings['pins'][pinKey]['active'] == True:
+
+                    if 'intent' in self.ioSettings['pins'][pinKey].keys():
+
+                        newEvent['value']['intent'] = self.ioSettings['pins'][pinKey]['intent']
+                        break
+
+        else:
+
+            if 'intent' in self.ioSettings[str(self.__class__.__name__).lower()].keys():
+
+                newEvent['value']['intent'] = self.ioSettings[str(self.__class__.__name__).lower()]['intent']
 
         apiRequest = threading.Thread(
             target=self.apiClient.sendRequest,

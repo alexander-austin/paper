@@ -230,9 +230,7 @@ def hardware(apiVersion, hardwarePath):
 
                     if isinstance(requestData, dict):
 
-                        database.stateEventAdd(requestData)
-
-                        return jsonify({'status': 'ok', 'api_version': apiVersion}), 200
+                        return hardwareEventManager__v1(requestData)
 
                 elif request.method == 'PUT':
 
@@ -271,13 +269,45 @@ def hardwareEventManager__v1(requestData):
 
             if requestData['type'] == 'event' and requestData['pending'] == True:
 
-                if requestData['component'] == 'mpu6050':
+                if requestData['value']['intent'] == 'orientation':
 
-                    pass
+                    displayMedia = database.metadataPlaylistCurrentGet()
 
-                elif requestData['component'].startswith('gpinput_'):
+                    requestData['value']['file'] = displayMedia['file']
 
-                    pass
+                    database.stateEventAdd(requestData)
+
+                    return jsonify({'status': 'ok', 'api_version': 'v1'}), 200
+
+                if requestData['value']['intent'] == 'show':
+
+                    displayMedia = database.metadataPlaylistCurrentGet()
+
+                    requestData['value']['file'] = displayMedia['file']
+
+                    database.stateEventAdd(requestData)
+
+                    return jsonify({'status': 'ok', 'api_version': 'v1'}), 200
+
+                elif requestData['value']['intent'] == 'next':
+
+                    displayMedia = database.metadataPlaylistMediaNextGet()
+
+                    requestData['value']['file'] = displayMedia['file']
+
+                    database.stateEventAdd(requestData)
+
+                    return jsonify({'status': 'ok', 'api_version': 'v1'}), 200
+
+                elif requestData['value']['intent'] == 'back':
+
+                    displayMedia = database.metadataPlaylistMediaBackGet()
+
+                    requestData['value']['file'] = displayMedia['file']
+
+                    database.stateEventAdd(requestData)
+
+                    return jsonify({'status': 'ok', 'api_version': 'v1'}), 200
 
 
     return  jsonify({'error': 'Bad Request', 'api_version': 'v1'}), 400

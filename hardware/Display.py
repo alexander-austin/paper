@@ -9,9 +9,9 @@ from utils import Imager
 class Display(HardwareBase):
 
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize."""
-        super(Display, self).__init__()
+        super(Display, self).__init__(*args, **kwargs)
 
         self.orientation = 'landscape'
         self.imager = Imager()
@@ -36,8 +36,6 @@ class Display(HardwareBase):
 
         if not self.state['value']['state'] == 'error': self._setState('ready')
 
-        self.run()
-
 
         return
 
@@ -50,9 +48,23 @@ class Display(HardwareBase):
 
             for event in events:
 
-                pass
+                if event['value']['intent'] == 'orientation':
 
-                self.orientation
+                    if not self.orientation == event['value']['orientation']['orientation']:
+
+                        self.orientation = event['value']['orientation']['orientation']
+
+                        if 'file' in event['value'].keys():
+
+                            self.currentFilePath = os.path.join(self.paths['media']['path'], event['value']['file'])
+
+                        self.displayOrientationChange()
+
+                elif event['value']['intent'] in ['next', 'back', 'show']:
+
+                    if 'file' in event['value'].keys():
+
+                        self.displayFileName(event['value']['file'])
 
             time.sleep(self.ioSettings[str(self.__class__.__name__).lower()]['run_interval'])
 

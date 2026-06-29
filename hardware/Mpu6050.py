@@ -9,9 +9,9 @@ from HardwareBase import HardwareBase
 class Mpu6050(HardwareBase):
 
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize."""
-        super(Mpu6050, self).__init__()
+        super(Mpu6050, self).__init__(*args, **kwargs)
 
         self.values = {}
 
@@ -47,8 +47,6 @@ class Mpu6050(HardwareBase):
         )
 
         if not self.state['value']['state'] == 'error': self._setState('ready')
-
-        self.run()
 
 
         return

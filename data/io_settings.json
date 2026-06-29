@@ -643,6 +643,7 @@
     "mpu6050": {
         "run_interval": 0.5,
         "pin_owner": false,
+        "intent": "orientation",
         "bus": 1,
         "address": 104,
         "registers": {
@@ -688,7 +689,7 @@
         "01": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 1,
             "gpio": -1,
             "gpclk": -1,
@@ -704,7 +705,7 @@
         "02": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 2,
             "gpio": -1,
             "gpclk": -1,
@@ -720,7 +721,7 @@
         "03": {
             "active": true,
             "owner": "mpu6050",
-            "name": "",
+            "intent": "",
             "pin": 3,
             "gpio": 2,
             "gpclk": -1,
@@ -736,7 +737,7 @@
         "04": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 4,
             "gpio": -1,
             "gpclk": -1,
@@ -752,7 +753,7 @@
         "05": {
             "active": true,
             "owner": "mpu6050",
-            "name": "",
+            "intent": "",
             "pin": 5,
             "gpio": 3,
             "gpclk": -1,
@@ -768,7 +769,7 @@
         "06": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 6,
             "gpio": -1,
             "gpclk": -1,
@@ -800,7 +801,7 @@
         "08": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 8,
             "gpio": 14,
             "gpclk": -1,
@@ -816,7 +817,7 @@
         "09": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 9,
             "gpio": -1,
             "gpclk": -1,
@@ -832,7 +833,7 @@
         "10": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 10,
             "gpio": 15,
             "gpclk": -1,
@@ -879,7 +880,7 @@
         "13": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 13,
             "gpio": 27,
             "gpclk": -1,
@@ -895,7 +896,7 @@
         "14": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 14,
             "gpio": -1,
             "gpclk": -1,
@@ -911,7 +912,7 @@
         "15": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 15,
             "gpio": 22,
             "gpclk": -1,
@@ -927,7 +928,7 @@
         "16": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 16,
             "gpio": 23,
             "gpclk": -1,
@@ -943,7 +944,7 @@
         "17": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 17,
             "gpio": -1,
             "gpclk": -1,
@@ -974,7 +975,7 @@
         "19": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 19,
             "gpio": 10,
             "gpclk": -1,
@@ -990,7 +991,7 @@
         "20": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 20,
             "gpio": -1,
             "gpclk": -1,
@@ -1006,7 +1007,7 @@
         "21": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 21,
             "gpio": 9,
             "gpclk": -1,
@@ -1037,7 +1038,7 @@
         "23": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 23,
             "gpio": 11,
             "gpclk": -1,
@@ -1068,7 +1069,7 @@
         "25": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 25,
             "gpio": -1,
             "gpclk": -1,
@@ -1084,7 +1085,7 @@
         "26": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 26,
             "gpio": 7,
             "gpclk": -1,
@@ -1100,7 +1101,7 @@
         "27": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 27,
             "gpio": 0,
             "gpclk": -1,
@@ -1116,7 +1117,7 @@
         "28": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 28,
             "gpio": 1,
             "gpclk": -1,
@@ -1132,7 +1133,7 @@
         "29": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 29,
             "gpio": 5,
             "gpclk": 1,
@@ -1148,7 +1149,7 @@
         "30": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 30,
             "gpio": -1,
             "gpclk": -1,
@@ -1164,7 +1165,7 @@
         "31": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 31,
             "gpio": 6,
             "gpclk": 2,
@@ -1180,7 +1181,7 @@
         "32": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 32,
             "gpio": 12,
             "gpclk": -1,
@@ -1196,7 +1197,7 @@
         "33": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 33,
             "gpio": 13,
             "gpclk": -1,
@@ -1212,7 +1213,7 @@
         "34": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 34,
             "gpio": -1,
             "gpclk": -1,
@@ -1228,7 +1229,7 @@
         "35": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 35,
             "gpio": 19,
             "gpclk": -1,
@@ -1244,7 +1245,7 @@
         "36": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 36,
             "gpio": 16,
             "gpclk": -1,
@@ -1276,7 +1277,7 @@
         "38": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 38,
             "gpio": 20,
             "gpclk": -1,
@@ -1292,7 +1293,7 @@
         "39": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 39,
             "gpio": -1,
             "gpclk": -1,
@@ -1308,7 +1309,7 @@
         "40": {
             "active": false,
             "owner": "",
-            "name": "",
+            "intent": "",
             "pin": 40,
             "gpio": 21,
             "gpclk": -1,
